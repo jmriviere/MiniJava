@@ -1,0 +1,12 @@
+INDEX VERSION 1.126+/home/poupine/ProjetSTDL/MiniJava/MicroJava1112/.metadata/.plugins/org.eclipse.jdt.core
+4091304355.index
+1257828480.index
+843093576.index
+1477775360.index
+2859745636.index
+990687336.index
+460275238.index
+3252505014.index
+3425764745.index
+2724798958.index
+3535258683.index

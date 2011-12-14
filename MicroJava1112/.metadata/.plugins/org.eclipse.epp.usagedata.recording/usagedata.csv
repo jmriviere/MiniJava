@@ -1,0 +1,13 @@
+what,kind,bundleId,bundleVersion,description,time
+stopped,bundle,org.eclipse.compare,3.5.201.R37x_v20110817-0800,"org.eclipse.compare",1323849351559
+stopped,bundle,org.eclipse.ui.externaltools,3.2.0.v20110506,"org.eclipse.ui.externaltools",1323849351559
+stopped,bundle,org.eclipse.debug.ui,3.7.101.v20110817_r371,"org.eclipse.debug.ui",1323849351564
+stopped,bundle,org.eclipse.mylyn.wikitext.ui,1.5.0.v20110608-1400,"org.eclipse.mylyn.wikitext.ui",1323849351564
+stopped,bundle,org.eclipse.ui.console,3.5.100.v20110511,"org.eclipse.ui.console",1323849351564
+stopped,bundle,org.eclipse.mylyn.commons.ui,3.6.1.v20110720-0100,"org.eclipse.mylyn.commons.ui",1323849351564
+stopped,bundle,org.eclipse.ui.editors,3.7.0.v20110517-0800,"org.eclipse.ui.editors",1323849351564
+stopped,bundle,org.eclipse.wst.common.snippets,1.2.100.v201103281740,"org.eclipse.wst.common.snippets",1323849351564
+stopped,bundle,org.eclipse.ui.workbench.texteditor,3.7.0.v20110505-0800,"org.eclipse.ui.workbench.texteditor",1323849351564
+stopped,bundle,org.eclipse.compare.core,3.5.200.I20110208-0800,"org.eclipse.compare.core",1323849351564
+stopped,bundle,org.eclipse.emf.edit.ui,2.7.0.v20110913-1156,"org.eclipse.emf.edit.ui",1323849351565
+stopped,bundle,org.eclipse.gef,3.7.1.v20110830-1143,"org.eclipse.gef",1323849351565

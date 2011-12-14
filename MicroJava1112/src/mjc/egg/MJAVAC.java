@@ -1,11 +1,10 @@
 package mjc.egg;
-import java.io.Serializable;
-
 import mg.egg.eggc.compiler.libjava.ISourceUnit;
 import mg.egg.eggc.compiler.libjava.SourceUnit;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
 import mg.egg.eggc.compiler.libjava.problem.ProblemReporter;
 import mg.egg.eggc.compiler.libjava.problem.ProblemRequestor;
+import java.io.*;
 public class MJAVAC implements Serializable {
  	private static final long serialVersionUID = 1L;
   public static void main(String[] args){

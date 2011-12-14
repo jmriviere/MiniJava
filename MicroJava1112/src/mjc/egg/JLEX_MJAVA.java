@@ -1,7 +1,5 @@
 package mjc.egg;
-import mg.egg.eggc.compiler.libjava.lex.LEX_ANALYZER;
-import mg.egg.eggc.compiler.libjava.lex.LEX_CONTEXTE;
-import mg.egg.eggc.compiler.libjava.lex.Yytoken;
+import mg.egg.eggc.compiler.libjava.lex.*;
 
 public class JLEX_MJAVA implements  LEX_ANALYZER  {
 	private final int YY_BUFFER_SIZE = 512;

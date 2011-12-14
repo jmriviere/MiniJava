@@ -1,5 +1,11 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
+import java.util.Vector;
 public class S_MCORPS_MJAVA {
 LEX_MJAVA scanner;
   S_MCORPS_MJAVA() {
@@ -27,10 +33,10 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_pv : // 1324
+      case LEX_MJAVA.token_pv : // 165
         regle17 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 1319
+      case LEX_MJAVA.token_aco : // 160
         regle18 () ;
       break ;
       default :

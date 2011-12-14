@@ -1,5 +1,11 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
+import java.util.Vector;
 public class S_ENTITES_MJAVA {
 LEX_MJAVA scanner;
   S_ENTITES_MJAVA() {
@@ -39,10 +45,10 @@ int [] sync= new int[0];
       case LEX_MJAVA.EOF :
         regle1 () ;
       break ;
-      case LEX_MJAVA.token_classe : // 1332
+      case LEX_MJAVA.token_classe : // 173
         regle2 () ;
       break ;
-      case LEX_MJAVA.token_interface : // 1333
+      case LEX_MJAVA.token_interface : // 174
         regle3 () ;
       break ;
       default :

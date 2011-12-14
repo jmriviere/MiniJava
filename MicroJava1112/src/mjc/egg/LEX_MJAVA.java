@@ -1,13 +1,14 @@
 package mjc.egg;
 import java.util.Arrays;
-
 import mg.egg.eggc.compiler.libjava.EGGException;
+import mg.egg.eggc.compiler.libjava.messages.NLS;
 import mg.egg.eggc.compiler.libjava.lex.LEXICAL4;
 import mg.egg.eggc.compiler.libjava.lex.LEX_CONTEXTE;
-import mg.egg.eggc.compiler.libjava.messages.NLS;
-import mg.egg.eggc.compiler.libjava.problem.IProblem;
 import mg.egg.eggc.compiler.libjava.problem.IProblemReporter;
+import mg.egg.eggc.compiler.libjava.problem.IProblem;
 import mg.egg.eggc.compiler.libjava.problem.ProblemSeverities;
+import mjc.compiler.*;
+import mjc.gc.*;
 public class LEX_MJAVA extends LEXICAL4  {
  public static final int EOF = 0 ;
  public static final int token_faux = 1 ;

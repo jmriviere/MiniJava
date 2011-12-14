@@ -1,11 +1,13 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
 import mg.egg.eggc.compiler.libjava.EGGException;
 import mg.egg.eggc.compiler.libjava.ISourceUnit;
 import mg.egg.eggc.compiler.libjava.lex.LEX_CONTEXTE;
-import mg.egg.eggc.compiler.libjava.messages.NLS;
 import mg.egg.eggc.compiler.libjava.problem.IProblemReporter;
+import mg.egg.eggc.compiler.libjava.problem.IProblem;
 import mg.egg.eggc.compiler.libjava.problem.ProblemSeverities;
-import mjc.compiler.MJAVASourceFile;
+import mg.egg.eggc.compiler.libjava.messages.NLS;
 public class MJAVA {
   LEX_MJAVA scanner;
   protected IProblemReporter problemReporter;

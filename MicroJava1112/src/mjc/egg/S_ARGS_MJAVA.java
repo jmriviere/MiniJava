@@ -1,5 +1,11 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
+import java.util.Vector;
 public class S_ARGS_MJAVA {
 LEX_MJAVA scanner;
   S_ARGS_MJAVA() {
@@ -27,37 +33,37 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_entier : // 1355
+      case LEX_MJAVA.token_entier : // 196
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_vrai : // 1353
+      case LEX_MJAVA.token_vrai : // 194
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_faux : // 1354
+      case LEX_MJAVA.token_faux : // 195
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_plus : // 1345
+      case LEX_MJAVA.token_plus : // 186
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 1346
+      case LEX_MJAVA.token_moins : // 187
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_non : // 1352
+      case LEX_MJAVA.token_non : // 193
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_null : // 1338
+      case LEX_MJAVA.token_null : // 179
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_paro : // 1317
+      case LEX_MJAVA.token_paro : // 158
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_nouveau : // 1337
+      case LEX_MJAVA.token_nouveau : // 178
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 1356
+      case LEX_MJAVA.token_ident : // 197
         regle77 () ;
       break ;
-      case LEX_MJAVA.token_parf : // 1318
+      case LEX_MJAVA.token_parf : // 159
         regle78 () ;
       break ;
       default :

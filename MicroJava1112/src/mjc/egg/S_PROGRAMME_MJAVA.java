@@ -1,9 +1,11 @@
 package mjc.egg;
-import mg.egg.eggc.compiler.libjava.messages.CoreMessages;
-import mg.egg.eggc.compiler.libjava.messages.ICoreMessages;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
-import mjc.compiler.MJAVASourceFile;
-import mjc.gc.AbstractMachine;
+import java.util.Vector;
 public class S_PROGRAMME_MJAVA {
 LEX_MJAVA scanner;
   S_PROGRAMME_MJAVA() {
@@ -46,10 +48,10 @@ glob_0_machine=this.att_source.getMachine();
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_classe : // 1332
+      case LEX_MJAVA.token_classe : // 173
         regle0 () ;
       break ;
-      case LEX_MJAVA.token_interface : // 1333
+      case LEX_MJAVA.token_interface : // 174
         regle0 () ;
       break ;
       case LEX_MJAVA.EOF :

@@ -1,5 +1,8 @@
 package mjc.egg;
-import mg.egg.eggc.compiler.libjava.EGGException;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
 public class T_MJAVA {
   LEX_MJAVA att_scanner;
   String att_txt;

@@ -1,5 +1,11 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
+import java.util.Vector;
 public class S_INSTS_MJAVA {
 LEX_MJAVA scanner;
   S_INSTS_MJAVA() {
@@ -27,52 +33,52 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_acf : // 1320
+      case LEX_MJAVA.token_acf : // 161
         regle29 () ;
       break ;
-      case LEX_MJAVA.token_int : // 1330
+      case LEX_MJAVA.token_int : // 171
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 1331
+      case LEX_MJAVA.token_bool : // 172
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 1356
+      case LEX_MJAVA.token_ident : // 197
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_entier : // 1355
+      case LEX_MJAVA.token_entier : // 196
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_vrai : // 1353
+      case LEX_MJAVA.token_vrai : // 194
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_faux : // 1354
+      case LEX_MJAVA.token_faux : // 195
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_plus : // 1345
+      case LEX_MJAVA.token_plus : // 186
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 1346
+      case LEX_MJAVA.token_moins : // 187
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_non : // 1352
+      case LEX_MJAVA.token_non : // 193
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_null : // 1338
+      case LEX_MJAVA.token_null : // 179
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_paro : // 1317
+      case LEX_MJAVA.token_paro : // 158
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_nouveau : // 1337
+      case LEX_MJAVA.token_nouveau : // 178
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 1319
+      case LEX_MJAVA.token_aco : // 160
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_si : // 1327
+      case LEX_MJAVA.token_si : // 168
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_retour : // 1336
+      case LEX_MJAVA.token_retour : // 177
         regle30 () ;
       break ;
       default :

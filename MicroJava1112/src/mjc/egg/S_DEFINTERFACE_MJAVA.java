@@ -1,4 +1,11 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
+import mg.egg.eggc.compiler.libjava.problem.IProblem;
+import java.util.Vector;
 public class S_DEFINTERFACE_MJAVA {
 LEX_MJAVA scanner;
   S_DEFINTERFACE_MJAVA() {

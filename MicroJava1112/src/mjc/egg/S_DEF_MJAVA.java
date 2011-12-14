@@ -1,5 +1,11 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
+import java.util.Vector;
 public class S_DEF_MJAVA {
 LEX_MJAVA scanner;
   S_DEF_MJAVA() {
@@ -73,16 +79,16 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_int : // 1330
+      case LEX_MJAVA.token_int : // 171
         scanner.lit ( 2 ) ;
         switch ( scanner.fenetre[1].code ) {
-          case LEX_MJAVA.token_ident : // 1356
+          case LEX_MJAVA.token_ident : // 197
             scanner.lit ( 3 ) ;
             switch ( scanner.fenetre[2].code ) {
-              case LEX_MJAVA.token_pv : // 1324
+              case LEX_MJAVA.token_pv : // 165
                 regle14 () ;
               break ;
-              case LEX_MJAVA.token_paro : // 1317
+              case LEX_MJAVA.token_paro : // 158
                 regle15 () ;
               break ;
               default :
@@ -95,16 +101,16 @@ scanner.accepter_sucre(LEX_MJAVA.token_ident);
 scanner.accepter_sucre(LEX_MJAVA.token_int);
         }
       break ;
-      case LEX_MJAVA.token_bool : // 1331
+      case LEX_MJAVA.token_bool : // 172
         scanner.lit ( 2 ) ;
         switch ( scanner.fenetre[1].code ) {
-          case LEX_MJAVA.token_ident : // 1356
+          case LEX_MJAVA.token_ident : // 197
             scanner.lit ( 3 ) ;
             switch ( scanner.fenetre[2].code ) {
-              case LEX_MJAVA.token_pv : // 1324
+              case LEX_MJAVA.token_pv : // 165
                 regle14 () ;
               break ;
-              case LEX_MJAVA.token_paro : // 1317
+              case LEX_MJAVA.token_paro : // 158
                 regle15 () ;
               break ;
               default :
@@ -117,16 +123,16 @@ scanner.accepter_sucre(LEX_MJAVA.token_ident);
 scanner.accepter_sucre(LEX_MJAVA.token_bool);
         }
       break ;
-      case LEX_MJAVA.token_ident : // 1356
+      case LEX_MJAVA.token_ident : // 197
         scanner.lit ( 2 ) ;
         switch ( scanner.fenetre[1].code ) {
-          case LEX_MJAVA.token_ident : // 1356
+          case LEX_MJAVA.token_ident : // 197
             scanner.lit ( 3 ) ;
             switch ( scanner.fenetre[2].code ) {
-              case LEX_MJAVA.token_pv : // 1324
+              case LEX_MJAVA.token_pv : // 165
                 regle14 () ;
               break ;
-              case LEX_MJAVA.token_paro : // 1317
+              case LEX_MJAVA.token_paro : // 158
                 regle15 () ;
               break ;
               default :
@@ -134,7 +140,7 @@ scanner.accepter_sucre(LEX_MJAVA.token_bool);
 scanner.accepter_sucre(LEX_MJAVA.token_ident);
             }
           break ;
-          case LEX_MJAVA.token_paro : // 1317
+          case LEX_MJAVA.token_paro : // 158
             regle19 () ;
           break ;
           default :
@@ -142,7 +148,7 @@ scanner.accepter_sucre(LEX_MJAVA.token_ident);
 scanner.accepter_sucre(LEX_MJAVA.token_ident);
         }
       break ;
-      case LEX_MJAVA.token_void : // 1329
+      case LEX_MJAVA.token_void : // 170
         regle16 () ;
       break ;
       default :

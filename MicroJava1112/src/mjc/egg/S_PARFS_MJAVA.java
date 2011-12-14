@@ -1,5 +1,11 @@
 package mjc.egg;
+import mjc.compiler.*;
+import mjc.gc.*;
+import mg.egg.eggc.compiler.libjava.lex.*;
+import mg.egg.eggc.compiler.libjava.messages.*;
+import mg.egg.eggc.compiler.libjava.*;
 import mg.egg.eggc.compiler.libjava.problem.IProblem;
+import java.util.Vector;
 public class S_PARFS_MJAVA {
 LEX_MJAVA scanner;
   S_PARFS_MJAVA() {
@@ -27,16 +33,16 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_parf : // 1318
+      case LEX_MJAVA.token_parf : // 159
         regle23 () ;
       break ;
-      case LEX_MJAVA.token_int : // 1330
+      case LEX_MJAVA.token_int : // 171
         regle24 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 1331
+      case LEX_MJAVA.token_bool : // 172
         regle24 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 1356
+      case LEX_MJAVA.token_ident : // 197
         regle24 () ;
       break ;
       default :

@@ -49,10 +49,10 @@ x_3.att_tds= new TDS();
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_classe : // 54803
+      case LEX_MJAVA.token_classe : // 29
         regle0 () ;
       break ;
-      case LEX_MJAVA.token_interface : // 54804
+      case LEX_MJAVA.token_interface : // 30
         regle0 () ;
       break ;
       case LEX_MJAVA.EOF :

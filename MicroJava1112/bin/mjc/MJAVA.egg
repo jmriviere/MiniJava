@@ -5,7 +5,7 @@ option k=3;
 
 -- les attributs semantiques
 inh source : MJAVASourceFile for PROGRAMME;
-inh tds : TDS for ENTITES, DEFCLASSE, DEFINTERFACE, CORPS, DEF, DEFS, BLOC, MCORPS;
+inh tds : TDS for ENTITES, DEFCLASSE, DEFINTERFACE, CORPS, DEF, DEFS, BLOC, MCORPS, INST, INSTS;
 
 -- Permet de compter le nombre d'attributs d'une classe/interface, afin de savoir la taille
 -- qu'elle va occuper en mémoire
@@ -109,7 +109,7 @@ end
 #tds {
 local
     info : INFO;
-    t : TYPE;
+    t : DTYPE;
 do
     info := DEFCLASSE^tds.chercherGlobalement(ident^txt);
     if info /= nil then
@@ -135,7 +135,7 @@ end
 #tds {
 local
     info : INFO;
-    t : TYPE;
+    t : DTYPE;
 do
     info := DEFINTERFACE^tds.chercherGlobalement(ident^txt);
     if info /= nil then
@@ -248,7 +248,12 @@ PARFSX ->  ;
 PARFSX -> virg  PARF  PARFSX ;
 PARF ->  TYPE ident  ;
 -- corps de methode et bloc d'instructions
-BLOC ->  aco INSTS acf  ;
+BLOC ->  aco #tds INSTS acf  ;
+#tds {
+do
+    INSTS^tds := BLOC^tds;
+end
+}
 -- instructions
 INSTS ->   ;
 INSTS ->  INST INSTS  ;
@@ -259,8 +264,17 @@ INST ->  E pv ;
 -- bloc d'instructions
 INST ->  BLOC  ;
 -- conditionnelle
-INST ->  si paro E parf BLOC SIX ;
-SIX ->   sinon BLOC ;
+INST ->  si paro E parf #tds BLOC SIX ;
+#tds {
+do 
+    BLOC^tds := new TDS();
+end
+}
+SIX ->   sinon #tds BLOC ;
+#tds {
+do
+    BLOC^tds := new TDS();
+end}
 SIX ->;
 -- return
 INST ->  retour E pv ;

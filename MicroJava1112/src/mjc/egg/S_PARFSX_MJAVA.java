@@ -35,10 +35,10 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_parf : // 54789
+      case LEX_MJAVA.token_parf : // 15
         regle25 () ;
       break ;
-      case LEX_MJAVA.token_virg : // 54794
+      case LEX_MJAVA.token_virg : // 20
         regle26 () ;
       break ;
       default :

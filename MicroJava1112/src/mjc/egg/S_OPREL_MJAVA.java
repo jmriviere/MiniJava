@@ -61,22 +61,22 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_inf : // 54810
+      case LEX_MJAVA.token_inf : // 36
         regle45 () ;
       break ;
-      case LEX_MJAVA.token_infeg : // 54811
+      case LEX_MJAVA.token_infeg : // 37
         regle46 () ;
       break ;
-      case LEX_MJAVA.token_sup : // 54812
+      case LEX_MJAVA.token_sup : // 38
         regle47 () ;
       break ;
-      case LEX_MJAVA.token_supeg : // 54813
+      case LEX_MJAVA.token_supeg : // 39
         regle48 () ;
       break ;
-      case LEX_MJAVA.token_eg : // 54814
+      case LEX_MJAVA.token_eg : // 40
         regle49 () ;
       break ;
-      case LEX_MJAVA.token_neg : // 54815
+      case LEX_MJAVA.token_neg : // 41
         regle50 () ;
       break ;
       default :

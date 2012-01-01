@@ -36,7 +36,7 @@ private void action_tds_5(T_MJAVA x_3, S_SUPER_MJAVA x_4, S_CORPS_MJAVA x_6) thr
 try {
 // locales
 INFO loc_info;
-TYPE loc_t;
+DTYPE loc_t;
 // instructions
 loc_info=this.att_tds.chercherGlobalement(x_3.att_txt);
 if (loc_info!=null){

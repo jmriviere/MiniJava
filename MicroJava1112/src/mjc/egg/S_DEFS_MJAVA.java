@@ -74,19 +74,19 @@ x_5.att_hnbAttr=this.att_hnbAttr;
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_acf : // 54791
+      case LEX_MJAVA.token_acf : // 17
         regle12 () ;
       break ;
-      case LEX_MJAVA.token_int : // 54801
+      case LEX_MJAVA.token_int : // 27
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 54802
+      case LEX_MJAVA.token_bool : // 28
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 54827
+      case LEX_MJAVA.token_ident : // 53
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_void : // 54800
+      case LEX_MJAVA.token_void : // 26
         regle13 () ;
       break ;
       default :

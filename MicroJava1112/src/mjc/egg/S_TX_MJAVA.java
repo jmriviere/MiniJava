@@ -35,55 +35,55 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_mult : // 54819
+      case LEX_MJAVA.token_mult : // 45
         regle57 () ;
       break ;
-      case LEX_MJAVA.token_div : // 54820
+      case LEX_MJAVA.token_div : // 46
         regle57 () ;
       break ;
-      case LEX_MJAVA.token_mod : // 54821
+      case LEX_MJAVA.token_mod : // 47
         regle57 () ;
       break ;
-      case LEX_MJAVA.token_et : // 54822
+      case LEX_MJAVA.token_et : // 48
         regle57 () ;
       break ;
-      case LEX_MJAVA.token_plus : // 54816
+      case LEX_MJAVA.token_plus : // 42
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 54817
+      case LEX_MJAVA.token_moins : // 43
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_ou : // 54818
+      case LEX_MJAVA.token_ou : // 44
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_inf : // 54810
+      case LEX_MJAVA.token_inf : // 36
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_infeg : // 54811
+      case LEX_MJAVA.token_infeg : // 37
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_sup : // 54812
+      case LEX_MJAVA.token_sup : // 38
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_supeg : // 54813
+      case LEX_MJAVA.token_supeg : // 39
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_eg : // 54814
+      case LEX_MJAVA.token_eg : // 40
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_neg : // 54815
+      case LEX_MJAVA.token_neg : // 41
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_affect : // 54797
+      case LEX_MJAVA.token_affect : // 23
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_virg : // 54794
+      case LEX_MJAVA.token_virg : // 20
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_pv : // 54795
+      case LEX_MJAVA.token_pv : // 21
         regle58 () ;
       break ;
-      case LEX_MJAVA.token_parf : // 54789
+      case LEX_MJAVA.token_parf : // 15
         regle58 () ;
       break ;
       default :

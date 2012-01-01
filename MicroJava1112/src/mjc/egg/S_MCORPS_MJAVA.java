@@ -15,6 +15,7 @@ LEX_MJAVA scanner;
     this.att_scanner = scanner;
     }
 int [] sync= new int[0];
+  TDS att_tds;
   LEX_MJAVA att_scanner;
   private void regle17() throws Exception {
 
@@ -26,17 +27,26 @@ int [] sync= new int[0];
   private void regle18() throws Exception {
 
     //declaration
-    S_BLOC_MJAVA x_2 = new S_BLOC_MJAVA(scanner) ;
+    S_BLOC_MJAVA x_3 = new S_BLOC_MJAVA(scanner) ;
     //appel
-    x_2.analyser() ;
+      action_tds_18(x_3);
+    x_3.analyser() ;
+  }
+private void action_tds_18(S_BLOC_MJAVA x_3) throws Exception {
+try {
+// instructions
+x_3.att_tds=this.att_tds;
+}catch(RuntimeException e) {		//e.printStackTrace();
+       scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
+	}
   }
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_pv : // 165
+      case LEX_MJAVA.token_pv : // 54795
         regle17 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 160
+      case LEX_MJAVA.token_aco : // 54790
         regle18 () ;
       break ;
       default :

@@ -15,6 +15,7 @@ LEX_MJAVA scanner;
     this.att_scanner = scanner;
     }
 int [] sync= new int[0];
+  TDS att_tds;
   LEX_MJAVA att_scanner;
   private void regle28() throws Exception {
 

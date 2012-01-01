@@ -18,4 +18,5 @@ public class MJAVAMessages extends NLS {
   public static  String MJAVA_expected_token;
   public static  String MJAVA_unexpected_token;
   public static  String MJAVA_expected_eof;
+  public static  String err_ident_already_known;
   }

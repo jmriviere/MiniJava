@@ -35,43 +35,43 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_plus : // 186
+      case LEX_MJAVA.token_plus : // 54816
         regle51 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 187
+      case LEX_MJAVA.token_moins : // 54817
         regle51 () ;
       break ;
-      case LEX_MJAVA.token_ou : // 188
+      case LEX_MJAVA.token_ou : // 54818
         regle51 () ;
       break ;
-      case LEX_MJAVA.token_inf : // 180
+      case LEX_MJAVA.token_inf : // 54810
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_infeg : // 181
+      case LEX_MJAVA.token_infeg : // 54811
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_sup : // 182
+      case LEX_MJAVA.token_sup : // 54812
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_supeg : // 183
+      case LEX_MJAVA.token_supeg : // 54813
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_eg : // 184
+      case LEX_MJAVA.token_eg : // 54814
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_neg : // 185
+      case LEX_MJAVA.token_neg : // 54815
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_affect : // 167
+      case LEX_MJAVA.token_affect : // 54797
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_virg : // 164
+      case LEX_MJAVA.token_virg : // 54794
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_pv : // 165
+      case LEX_MJAVA.token_pv : // 54795
         regle52 () ;
       break ;
-      case LEX_MJAVA.token_parf : // 159
+      case LEX_MJAVA.token_parf : // 54789
         regle52 () ;
       break ;
       default :

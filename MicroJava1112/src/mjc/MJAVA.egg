@@ -5,6 +5,13 @@ option k=3;
 
 -- les attributs semantiques
 inh source : MJAVASourceFile for PROGRAMME;
+inh tds : TDS for ENTITES, DEFCLASSE, DEFINTERFACE, CORPS, DEF, DEFS, BLOC, MCORPS;
+
+-- Permet de compter le nombre d'attributs d'une classe/interface, afin de savoir la taille
+-- qu'elle va occuper en mémoire
+inh hnbAttr : INTEGER for CORPS, DEF, DEFS;
+syn nbAttr : INTEGER for CORPS, DEF, DEFS;
+
 -- les terminaux 
 
 space separateur is  "[\r\n\t ]+";     
@@ -59,6 +66,7 @@ global
 local
 do
    machine := PROGRAMME^source.getMachine();
+   ENTITES^tds := new TDS();
 end
 }
 
@@ -70,13 +78,74 @@ end
 }
 
 ENTITES -> ;
-ENTITES -> DEFCLASSE ENTITES  ;
-ENTITES -> DEFINTERFACE ENTITES  ;
+ENTITES -> #tds DEFCLASSE ENTITES  ;
+
+#tds {
+do
+    DEFCLASSE^tds := ENTITES^tds;
+    ENTITES1^tds := ENTITES^tds;
+end
+}
+
+ENTITES -> #tds DEFINTERFACE ENTITES  ;
+
+#tds {
+do
+    DEFINTERFACE^tds := ENTITES^tds;
+    ENTITES1^tds := ENTITES^tds;
+end
+}
+
 -- definition d'une classe
-DEFCLASSE -> classe ident SUPER CORPS ;
+DEFCLASSE -> classe ident SUPER #attr CORPS #tds;
+
+#attr {
+do
+    CORPS^tds := DEFCLASSE^tds;
+    CORPS^hnbAttr := 0;
+end
+}
+
+#tds {
+local
+    info : INFO;
+    t : TYPE;
+do
+    info := DEFCLASSE^tds.chercherGlobalement(ident^txt);
+    if info /= nil then
+        error(err_ident_already_known, ident^txt);
+    else
+        t := new DTYPE(ident^txt, CORPS^nbAttr);
+        call DEFCLASSE^tds.inserer(ident^txt, new INFOCLASS(t, false));
+    end
+end
+}
+
 --DEFCLASSE -> classe ident etend ident CORPS ;
 --DEFCLASSE -> classe ident implemente ident CORPS ;
-DEFINTERFACE -> interface ident SUPER CORPS;
+DEFINTERFACE -> interface ident SUPER #attr CORPS #tds;
+
+#attr {
+do
+    CORPS^tds := DEFINTERFACE^tds;
+    CORPS^hnbAttr := 0;
+end
+}
+
+#tds {
+local
+    info : INFO;
+    t : TYPE;
+do
+    info := DEFINTERFACE^tds.chercherGlobalement(ident^txt);
+    if info /= nil then
+        error(err_ident_already_known, ident^txt);
+    else
+        t := new DTYPE(ident^txt, CORPS^nbAttr);
+        call DEFINTERFACE^tds.inserer(ident^txt, new INFOCLASS(t, false));
+    end
+end
+}
 --DEFINTERFACE -> interface ident etend ident CORPS;
 -- 1 extends maximum suivi d'un implements maximum
 SUPER -> ETEND IMPL ;
@@ -84,21 +153,90 @@ ETEND -> ;
 ETEND -> etend ident ;
 IMPL -> ;
 IMPL -> implemente ident ;
-CORPS -> aco DEFS acf ;
+CORPS -> aco #tds DEFS #attr acf ;
+#tds {
+do
+    DEFS^tds := new TDS(CORPS^tds);
+end
+}
+
+#attr {
+do
+    CORPS^nbAttr := DEFS^nbAttr;
+end
+}
 -- les attributs
-DEFS ->   ;
-DEFS ->  DEF DEFS   ;
+DEFS -> #attr  ;
+#attr {
+do
+    DEFS^nbAttr := DEFS^hnbAttr;
+end
+}
+
+DEFS ->  #tds DEF #attr DEFS   ;
+#tds {
+do
+    DEF^tds := DEFS^tds;
+end
+}
+#attr {
+do
+    DEFS^nbAttr := DEF^nbAttr + DEFS^hnbAttr;
+end}
 -- attribut
-DEF ->  TYPE ident pv  ;
+DEF ->  TYPE ident pv #attr ;
+#attr {
+do
+    DEF^nbAttr := 1;
+end
+}
 -- methode (fonction) 
-DEF ->  TYPE ident paro PARFS parf MCORPS  ;
+DEF ->  TYPE ident paro PARFS parf #tds MCORPS #attr ;
+#tds {
+do
+    MCORPS^tds := new TDS(DEF^tds);
+end
+}
+
+#attr {
+do
+    DEF^nbAttr := 0;
+end
+}
 -- methode (procedure)
-DEF ->  void ident paro PARFS parf MCORPS  ;
+DEF ->  void ident paro PARFS parf #tds MCORPS #attr ;
+#tds {
+do
+    MCORPS^tds := DEF^tds;
+end
+}
+
+#attr {
+do
+    DEF^nbAttr := 0;
+end
+}
 -- dans classe ou dans interface
 MCORPS -> pv ;
-MCORPS -> BLOC ;
+MCORPS -> #tds BLOC ;
+#tds {
+do
+    BLOC^tds := MCORPS^tds;
+end
+}
 -- constructeur
-DEF -> ident  paro PARFS parf BLOC  ; 
+DEF -> ident paro PARFS parf #tds BLOC #attr ;
+#tds {
+do
+    BLOC^tds := new TDS(DEF^tds);
+end
+}
+#attr {
+do
+    DEF^nbAttr := 0;
+end
+} 
+
 -- les types
 TYPE-> int  ;
 TYPE-> bool ;

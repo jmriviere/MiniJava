@@ -91,34 +91,34 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_entier : // 196
+      case LEX_MJAVA.token_entier : // 54826
         regle63 () ;
       break ;
-      case LEX_MJAVA.token_vrai : // 194
+      case LEX_MJAVA.token_vrai : // 54824
         regle64 () ;
       break ;
-      case LEX_MJAVA.token_faux : // 195
+      case LEX_MJAVA.token_faux : // 54825
         regle65 () ;
       break ;
-      case LEX_MJAVA.token_plus : // 186
+      case LEX_MJAVA.token_plus : // 54816
         regle66 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 187
+      case LEX_MJAVA.token_moins : // 54817
         regle66 () ;
       break ;
-      case LEX_MJAVA.token_non : // 193
+      case LEX_MJAVA.token_non : // 54823
         regle66 () ;
       break ;
-      case LEX_MJAVA.token_null : // 179
+      case LEX_MJAVA.token_null : // 54809
         regle70 () ;
       break ;
-      case LEX_MJAVA.token_paro : // 158
+      case LEX_MJAVA.token_paro : // 54788
         regle71 () ;
       break ;
-      case LEX_MJAVA.token_nouveau : // 178
+      case LEX_MJAVA.token_nouveau : // 54808
         regle72 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 197
+      case LEX_MJAVA.token_ident : // 54827
         regle73 () ;
       break ;
       default :

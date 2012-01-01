@@ -41,6 +41,7 @@ try {
 // locales
 // instructions
 glob_0_machine=this.att_source.getMachine();
+x_3.att_tds= new TDS();
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}
@@ -48,10 +49,10 @@ glob_0_machine=this.att_source.getMachine();
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_classe : // 173
+      case LEX_MJAVA.token_classe : // 54803
         regle0 () ;
       break ;
-      case LEX_MJAVA.token_interface : // 174
+      case LEX_MJAVA.token_interface : // 54804
         regle0 () ;
       break ;
       case LEX_MJAVA.EOF :

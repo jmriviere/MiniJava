@@ -76,67 +76,67 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_int : // 171
+      case LEX_MJAVA.token_int : // 54801
         regle31 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 172
+      case LEX_MJAVA.token_bool : // 54802
         regle31 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 197
+      case LEX_MJAVA.token_ident : // 54827
         scanner.lit ( 2 ) ;
         switch ( scanner.fenetre[1].code ) {
-          case LEX_MJAVA.token_ident : // 197
+          case LEX_MJAVA.token_ident : // 54827
             regle31 () ;
           break ;
-          case LEX_MJAVA.token_pt : // 166
+          case LEX_MJAVA.token_pt : // 54796
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_paro : // 158
+          case LEX_MJAVA.token_paro : // 54788
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_mult : // 189
+          case LEX_MJAVA.token_mult : // 54819
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_div : // 190
+          case LEX_MJAVA.token_div : // 54820
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_mod : // 191
+          case LEX_MJAVA.token_mod : // 54821
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_et : // 192
+          case LEX_MJAVA.token_et : // 54822
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_plus : // 186
+          case LEX_MJAVA.token_plus : // 54816
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_moins : // 187
+          case LEX_MJAVA.token_moins : // 54817
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_ou : // 188
+          case LEX_MJAVA.token_ou : // 54818
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_inf : // 180
+          case LEX_MJAVA.token_inf : // 54810
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_infeg : // 181
+          case LEX_MJAVA.token_infeg : // 54811
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_sup : // 182
+          case LEX_MJAVA.token_sup : // 54812
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_supeg : // 183
+          case LEX_MJAVA.token_supeg : // 54813
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_eg : // 184
+          case LEX_MJAVA.token_eg : // 54814
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_neg : // 185
+          case LEX_MJAVA.token_neg : // 54815
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_affect : // 167
+          case LEX_MJAVA.token_affect : // 54797
             regle32 () ;
           break ;
-          case LEX_MJAVA.token_pv : // 165
+          case LEX_MJAVA.token_pv : // 54795
             regle32 () ;
           break ;
           default :
@@ -144,40 +144,40 @@ int [] sync= new int[0];
 scanner.accepter_sucre(LEX_MJAVA.token_ident);
         }
       break ;
-      case LEX_MJAVA.token_entier : // 196
+      case LEX_MJAVA.token_entier : // 54826
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_vrai : // 194
+      case LEX_MJAVA.token_vrai : // 54824
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_faux : // 195
+      case LEX_MJAVA.token_faux : // 54825
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_plus : // 186
+      case LEX_MJAVA.token_plus : // 54816
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 187
+      case LEX_MJAVA.token_moins : // 54817
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_non : // 193
+      case LEX_MJAVA.token_non : // 54823
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_null : // 179
+      case LEX_MJAVA.token_null : // 54809
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_paro : // 158
+      case LEX_MJAVA.token_paro : // 54788
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_nouveau : // 178
+      case LEX_MJAVA.token_nouveau : // 54808
         regle32 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 160
+      case LEX_MJAVA.token_aco : // 54790
         regle33 () ;
       break ;
-      case LEX_MJAVA.token_si : // 168
+      case LEX_MJAVA.token_si : // 54798
         regle34 () ;
       break ;
-      case LEX_MJAVA.token_retour : // 177
+      case LEX_MJAVA.token_retour : // 54807
         regle37 () ;
       break ;
       default :

@@ -42,55 +42,55 @@ x_4.att_tds= new TDS();
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_sinon : // 25
+      case LEX_MJAVA.token_sinon : // 11472
         regle35 () ;
       break ;
-      case LEX_MJAVA.token_int : // 27
+      case LEX_MJAVA.token_int : // 11474
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 28
+      case LEX_MJAVA.token_bool : // 11475
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 53
+      case LEX_MJAVA.token_ident : // 11500
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_entier : // 52
+      case LEX_MJAVA.token_entier : // 11499
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_vrai : // 50
+      case LEX_MJAVA.token_vrai : // 11497
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_faux : // 51
+      case LEX_MJAVA.token_faux : // 11498
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_plus : // 42
+      case LEX_MJAVA.token_plus : // 11489
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 43
+      case LEX_MJAVA.token_moins : // 11490
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_non : // 49
+      case LEX_MJAVA.token_non : // 11496
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_null : // 35
+      case LEX_MJAVA.token_null : // 11482
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_paro : // 14
+      case LEX_MJAVA.token_paro : // 11461
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_nouveau : // 34
+      case LEX_MJAVA.token_nouveau : // 11481
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 16
+      case LEX_MJAVA.token_aco : // 11463
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_si : // 24
+      case LEX_MJAVA.token_si : // 11471
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_retour : // 33
+      case LEX_MJAVA.token_retour : // 11480
         regle36 () ;
       break ;
-      case LEX_MJAVA.token_acf : // 17
+      case LEX_MJAVA.token_acf : // 11464
         regle36 () ;
       break ;
       default :

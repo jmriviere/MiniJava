@@ -61,19 +61,21 @@ term ident is  "[_A-Za-z][_0-9A-Za-z]*";
 PROGRAMME -> #init ENTITES #gen;
 global
    machine : AbstractMachine;
-   
+   t : TDS;
 #init {
 local
 do
    machine := PROGRAMME^source.getMachine();
-   ENTITES^tds := new TDS();
+   t := new TDS();
+   ENTITES^tds := t;
 end
 }
 
 #gen {
 local
 do
-  call machine.writeCode(PROGRAMME^source.getFileName(), "");
+    call machine.writeCode(PROGRAMME^source.getFileName(), "");
+    write "tds " + t;
 end
 }
 
@@ -173,19 +175,28 @@ do
 end
 }
 
-DEFS ->  #tds DEF #attr DEFS   ;
+DEFS ->  #tds DEF #attr DEFS #attr2 ;
 #tds {
 do
     DEF^tds := DEFS^tds;
+    DEF^hnbAttr := DEFS^hnbAttr;
 end
 }
 #attr {
 do
-    DEFS^nbAttr := DEF^nbAttr + DEFS^hnbAttr;
-end}
+    DEFS1^hnbAttr := DEF^nbAttr;
+end
+}
+#attr2 {
+do
+    DEFS^nbAttr := DEF^nbAttr + DEFS1^nbAttr;
+end
+}
+
 -- attribut
 DEF ->  TYPE ident pv #attr ;
 #attr {
+local
 do
     DEF^nbAttr := 1;
 end

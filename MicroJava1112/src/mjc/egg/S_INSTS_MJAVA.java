@@ -44,52 +44,52 @@ x_3.att_tds=this.att_tds;
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_acf : // 17
+      case LEX_MJAVA.token_acf : // 11464
         regle29 () ;
       break ;
-      case LEX_MJAVA.token_int : // 27
+      case LEX_MJAVA.token_int : // 11474
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 28
+      case LEX_MJAVA.token_bool : // 11475
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 53
+      case LEX_MJAVA.token_ident : // 11500
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_entier : // 52
+      case LEX_MJAVA.token_entier : // 11499
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_vrai : // 50
+      case LEX_MJAVA.token_vrai : // 11497
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_faux : // 51
+      case LEX_MJAVA.token_faux : // 11498
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_plus : // 42
+      case LEX_MJAVA.token_plus : // 11489
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 43
+      case LEX_MJAVA.token_moins : // 11490
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_non : // 49
+      case LEX_MJAVA.token_non : // 11496
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_null : // 35
+      case LEX_MJAVA.token_null : // 11482
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_paro : // 14
+      case LEX_MJAVA.token_paro : // 11461
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_nouveau : // 34
+      case LEX_MJAVA.token_nouveau : // 11481
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 16
+      case LEX_MJAVA.token_aco : // 11463
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_si : // 24
+      case LEX_MJAVA.token_si : // 11471
         regle30 () ;
       break ;
-      case LEX_MJAVA.token_retour : // 33
+      case LEX_MJAVA.token_retour : // 11480
         regle30 () ;
       break ;
       default :

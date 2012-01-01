@@ -30,6 +30,7 @@ int [] sync= new int[0];
     x_3.analyser() ;
       action_attr_13(x_3, x_5);
     x_5.analyser() ;
+      action_attr2_13(x_3, x_5);
   }
   private void regle12() throws Exception {
 
@@ -40,7 +41,15 @@ int [] sync= new int[0];
 private void action_attr_13(S_DEF_MJAVA x_3, S_DEFS_MJAVA x_5) throws Exception {
 try {
 // instructions
-this.att_nbAttr=x_3.att_nbAttr+this.att_hnbAttr;
+x_5.att_hnbAttr=x_3.att_nbAttr;
+}catch(RuntimeException e) {		//e.printStackTrace();
+       scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
+	}
+  }
+private void action_attr2_13(S_DEF_MJAVA x_3, S_DEFS_MJAVA x_5) throws Exception {
+try {
+// instructions
+this.att_nbAttr=x_3.att_nbAttr+x_5.att_nbAttr;
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}
@@ -49,6 +58,7 @@ private void action_tds_13(S_DEF_MJAVA x_3, S_DEFS_MJAVA x_5) throws Exception {
 try {
 // instructions
 x_3.att_tds=this.att_tds;
+x_3.att_hnbAttr=this.att_hnbAttr;
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}
@@ -65,8 +75,6 @@ private void action_auto_inh_13(S_DEF_MJAVA x_3, S_DEFS_MJAVA x_5) throws Except
 try {
 // instructions
 x_5.att_tds=this.att_tds;
-x_3.att_hnbAttr=this.att_hnbAttr;
-x_5.att_hnbAttr=this.att_hnbAttr;
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}
@@ -74,19 +82,19 @@ x_5.att_hnbAttr=this.att_hnbAttr;
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_acf : // 17
+      case LEX_MJAVA.token_acf : // 11464
         regle12 () ;
       break ;
-      case LEX_MJAVA.token_int : // 27
+      case LEX_MJAVA.token_int : // 11474
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 28
+      case LEX_MJAVA.token_bool : // 11475
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 53
+      case LEX_MJAVA.token_ident : // 11500
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_void : // 26
+      case LEX_MJAVA.token_void : // 11473
         regle13 () ;
       break ;
       default :

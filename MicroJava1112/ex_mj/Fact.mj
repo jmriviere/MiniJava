@@ -1,4 +1,6 @@
 class Fact {
+int f;
+int g;
   int fact(int n) {
     if(n <1) { 
       return 1; 

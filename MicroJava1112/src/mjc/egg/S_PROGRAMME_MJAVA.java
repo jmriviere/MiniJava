@@ -18,6 +18,7 @@ int [] sync= new int[0];
   MJAVASourceFile att_source;
   LEX_MJAVA att_scanner;
   AbstractMachine glob_0_machine;
+  TDS glob_0_t;
   private void regle0() throws Exception {
 
     //declaration
@@ -32,6 +33,7 @@ try {
 // locales
 // instructions
     glob_0_machine.writeCode(this.att_source.getFileName(), "");
+System.out.print(""+"tds "+glob_0_t);
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}
@@ -41,7 +43,8 @@ try {
 // locales
 // instructions
 glob_0_machine=this.att_source.getMachine();
-x_3.att_tds= new TDS();
+glob_0_t= new TDS();
+x_3.att_tds=glob_0_t;
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}
@@ -49,10 +52,10 @@ x_3.att_tds= new TDS();
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_classe : // 29
+      case LEX_MJAVA.token_classe : // 11476
         regle0 () ;
       break ;
-      case LEX_MJAVA.token_interface : // 30
+      case LEX_MJAVA.token_interface : // 11477
         regle0 () ;
       break ;
       case LEX_MJAVA.EOF :

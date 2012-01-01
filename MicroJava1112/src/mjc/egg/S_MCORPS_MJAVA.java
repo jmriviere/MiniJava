@@ -43,10 +43,10 @@ x_3.att_tds=this.att_tds;
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_pv : // 21
+      case LEX_MJAVA.token_pv : // 11468
         regle17 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 16
+      case LEX_MJAVA.token_aco : // 11463
         regle18 () ;
       break ;
       default :

@@ -25,7 +25,6 @@ int [] sync= new int[0];
     S_DEF_MJAVA x_3 = new S_DEF_MJAVA(scanner) ;
     S_DEFS_MJAVA x_5 = new S_DEFS_MJAVA(scanner) ;
     //appel
-      action_auto_inh_13(x_3, x_5);
       action_tds_13(x_3, x_5);
     x_3.analyser() ;
       action_attr_13(x_3, x_5);
@@ -58,6 +57,7 @@ private void action_tds_13(S_DEF_MJAVA x_3, S_DEFS_MJAVA x_5) throws Exception {
 try {
 // instructions
 x_3.att_tds=this.att_tds;
+x_5.att_tds=this.att_tds;
 x_3.att_hnbAttr=this.att_hnbAttr;
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
@@ -71,30 +71,22 @@ this.att_nbAttr=this.att_hnbAttr;
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}
   }
-private void action_auto_inh_13(S_DEF_MJAVA x_3, S_DEFS_MJAVA x_5) throws Exception {
-try {
-// instructions
-x_5.att_tds=this.att_tds;
-}catch(RuntimeException e) {		//e.printStackTrace();
-       scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
-	}
-  }
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_acf : // 11464
+      case LEX_MJAVA.token_acf : // 16055
         regle12 () ;
       break ;
-      case LEX_MJAVA.token_int : // 11474
+      case LEX_MJAVA.token_int : // 16065
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_bool : // 11475
+      case LEX_MJAVA.token_bool : // 16066
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_ident : // 11500
+      case LEX_MJAVA.token_ident : // 16091
         regle13 () ;
       break ;
-      case LEX_MJAVA.token_void : // 11473
+      case LEX_MJAVA.token_void : // 16064
         regle13 () ;
       break ;
       default :

@@ -40,7 +40,7 @@ DTYPE loc_t;
 // instructions
 loc_info=this.att_tds.chercherGlobalement(x_3.att_txt);
 if (loc_info!=null){
-att_scanner._interrompre(IProblem.Semantic, att_scanner.getBeginLine(), IMJAVAMessages.id_err_ident_already_known, MJAVAMessages.err_ident_already_known,new Object[]{""+x_3.att_txt});
+att_scanner._interrompre(IProblem.Semantic, att_scanner.getBeginLine(), IMJAVAMessages.id_err_ident_already_known, MJAVAMessages.err_ident_already_known,new Object[]{""+"La classe", ""+x_3.att_txt});
 
 }
 else {

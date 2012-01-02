@@ -115,7 +115,7 @@ local
 do
     info := DEFCLASSE^tds.chercherGlobalement(ident^txt);
     if info /= nil then
-        error(err_ident_already_known, ident^txt);
+        error(err_ident_already_known, "La classe", ident^txt);
     else
         t := new DTYPE(ident^txt, CORPS^nbAttr);
         call DEFCLASSE^tds.inserer(ident^txt, new INFOCLASS(t, false));
@@ -141,7 +141,7 @@ local
 do
     info := DEFINTERFACE^tds.chercherGlobalement(ident^txt);
     if info /= nil then
-        error(err_ident_already_known, ident^txt);
+        error(err_ident_already_known, "L'interface", ident^txt);
     else
         t := new DTYPE(ident^txt, CORPS^nbAttr);
         call DEFINTERFACE^tds.inserer(ident^txt, new INFOCLASS(t, false));
@@ -156,15 +156,19 @@ ETEND -> etend ident ;
 IMPL -> ;
 IMPL -> implemente ident ;
 CORPS -> aco #tds DEFS #attr acf ;
+
+global t : TDS;
 #tds {
 do
-    DEFS^tds := new TDS(CORPS^tds);
+    t := new TDS(CORPS^tds);
+    DEFS^tds  := t;
 end
 }
 
 #attr {
 do
     CORPS^nbAttr := DEFS^nbAttr;
+--    write "\n" + t;
 end
 }
 -- les attributs
@@ -179,6 +183,7 @@ DEFS ->  #tds DEF #attr DEFS #attr2 ;
 #tds {
 do
     DEF^tds := DEFS^tds;
+    DEFS1^tds := DEFS^tds;
     DEF^hnbAttr := DEFS^hnbAttr;
 end
 }
@@ -197,10 +202,19 @@ end
 DEF ->  TYPE ident pv #attr ;
 #attr {
 local
+info : INFO;
 do
-    DEF^nbAttr := 1;
+    info := DEF^tds.chercherLocalement(ident^txt);
+    if info /= nil then
+        error(err_ident_already_known, "L'attribut", ident^txt);
+    else
+    -- TODO: insérer l'attribut avec le bon type.
+        call DEF^tds.inserer(ident^txt, new INFO(new DTYPE(ident^txt, 1)));
+        DEF^nbAttr := 1;
+    end
 end
 }
+
 -- methode (fonction) 
 DEF ->  TYPE ident paro PARFS parf #tds MCORPS #attr ;
 #tds {

@@ -19,6 +19,7 @@ int [] sync= new int[0];
   int att_hnbAttr;
   TDS att_tds;
   LEX_MJAVA att_scanner;
+  TDS glob_11_t;
   private void regle11() throws Exception {
 
     //declaration
@@ -44,7 +45,8 @@ this.att_nbAttr=x_4.att_nbAttr;
 private void action_tds_11(S_DEFS_MJAVA x_4) throws Exception {
 try {
 // instructions
-x_4.att_tds= new TDS(this.att_tds);
+glob_11_t= new TDS(this.att_tds);
+x_4.att_tds=glob_11_t;
 }catch(RuntimeException e) {		//e.printStackTrace();
        scanner._interrompre(IProblem.Internal, scanner.getBeginLine(), ICoreMessages.id_EGG_runtime_error, CoreMessages.EGG_runtime_error,e.getStackTrace());
 	}

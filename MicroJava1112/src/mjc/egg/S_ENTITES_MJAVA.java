@@ -66,10 +66,10 @@ x_4.att_tds=this.att_tds;
       case LEX_MJAVA.EOF :
         regle1 () ;
       break ;
-      case LEX_MJAVA.token_classe : // 11476
+      case LEX_MJAVA.token_classe : // 16067
         regle2 () ;
       break ;
-      case LEX_MJAVA.token_interface : // 11477
+      case LEX_MJAVA.token_interface : // 16068
         regle3 () ;
       break ;
       default :

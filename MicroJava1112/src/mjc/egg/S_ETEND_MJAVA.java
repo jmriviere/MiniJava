@@ -33,13 +33,13 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_implemente : // 16070
+      case LEX_MJAVA.token_implemente : // 109
         regle7 () ;
       break ;
-      case LEX_MJAVA.token_aco : // 16054
+      case LEX_MJAVA.token_aco : // 93
         regle7 () ;
       break ;
-      case LEX_MJAVA.token_etend : // 16069
+      case LEX_MJAVA.token_etend : // 108
         regle8 () ;
       break ;
       default :

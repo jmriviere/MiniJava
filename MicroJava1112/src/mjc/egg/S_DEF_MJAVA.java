@@ -155,16 +155,16 @@ this.att_nbAttr=0;
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_int : // 16065
+      case LEX_MJAVA.token_int : // 104
         scanner.lit ( 2 ) ;
         switch ( scanner.fenetre[1].code ) {
-          case LEX_MJAVA.token_ident : // 16091
+          case LEX_MJAVA.token_ident : // 130
             scanner.lit ( 3 ) ;
             switch ( scanner.fenetre[2].code ) {
-              case LEX_MJAVA.token_pv : // 16059
+              case LEX_MJAVA.token_pv : // 98
                 regle14 () ;
               break ;
-              case LEX_MJAVA.token_paro : // 16052
+              case LEX_MJAVA.token_paro : // 91
                 regle15 () ;
               break ;
               default :
@@ -177,16 +177,16 @@ scanner.accepter_sucre(LEX_MJAVA.token_ident);
 scanner.accepter_sucre(LEX_MJAVA.token_int);
         }
       break ;
-      case LEX_MJAVA.token_bool : // 16066
+      case LEX_MJAVA.token_bool : // 105
         scanner.lit ( 2 ) ;
         switch ( scanner.fenetre[1].code ) {
-          case LEX_MJAVA.token_ident : // 16091
+          case LEX_MJAVA.token_ident : // 130
             scanner.lit ( 3 ) ;
             switch ( scanner.fenetre[2].code ) {
-              case LEX_MJAVA.token_pv : // 16059
+              case LEX_MJAVA.token_pv : // 98
                 regle14 () ;
               break ;
-              case LEX_MJAVA.token_paro : // 16052
+              case LEX_MJAVA.token_paro : // 91
                 regle15 () ;
               break ;
               default :
@@ -199,16 +199,16 @@ scanner.accepter_sucre(LEX_MJAVA.token_ident);
 scanner.accepter_sucre(LEX_MJAVA.token_bool);
         }
       break ;
-      case LEX_MJAVA.token_ident : // 16091
+      case LEX_MJAVA.token_ident : // 130
         scanner.lit ( 2 ) ;
         switch ( scanner.fenetre[1].code ) {
-          case LEX_MJAVA.token_ident : // 16091
+          case LEX_MJAVA.token_ident : // 130
             scanner.lit ( 3 ) ;
             switch ( scanner.fenetre[2].code ) {
-              case LEX_MJAVA.token_pv : // 16059
+              case LEX_MJAVA.token_pv : // 98
                 regle14 () ;
               break ;
-              case LEX_MJAVA.token_paro : // 16052
+              case LEX_MJAVA.token_paro : // 91
                 regle15 () ;
               break ;
               default :
@@ -216,7 +216,7 @@ scanner.accepter_sucre(LEX_MJAVA.token_bool);
 scanner.accepter_sucre(LEX_MJAVA.token_ident);
             }
           break ;
-          case LEX_MJAVA.token_paro : // 16052
+          case LEX_MJAVA.token_paro : // 91
             regle19 () ;
           break ;
           default :
@@ -224,7 +224,7 @@ scanner.accepter_sucre(LEX_MJAVA.token_ident);
 scanner.accepter_sucre(LEX_MJAVA.token_ident);
         }
       break ;
-      case LEX_MJAVA.token_void : // 16064
+      case LEX_MJAVA.token_void : // 103
         regle16 () ;
       break ;
       default :

@@ -40,13 +40,13 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_plus : // 16080
+      case LEX_MJAVA.token_plus : // 119
         regle53 () ;
       break ;
-      case LEX_MJAVA.token_moins : // 16081
+      case LEX_MJAVA.token_moins : // 120
         regle54 () ;
       break ;
-      case LEX_MJAVA.token_ou : // 16082
+      case LEX_MJAVA.token_ou : // 121
         regle55 () ;
       break ;
       default :

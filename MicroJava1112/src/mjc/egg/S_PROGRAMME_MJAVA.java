@@ -52,10 +52,10 @@ x_3.att_tds=glob_0_t;
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_classe : // 16067
+      case LEX_MJAVA.token_classe : // 106
         regle0 () ;
       break ;
-      case LEX_MJAVA.token_interface : // 16068
+      case LEX_MJAVA.token_interface : // 107
         regle0 () ;
       break ;
       case LEX_MJAVA.EOF :

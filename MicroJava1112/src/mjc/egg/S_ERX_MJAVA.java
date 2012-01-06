@@ -33,34 +33,34 @@ int [] sync= new int[0];
   public void analyser () throws Exception {
     scanner.lit ( 1 ) ;
     switch ( scanner.fenetre[0].code ) {
-      case LEX_MJAVA.token_inf : // 16074
+      case LEX_MJAVA.token_inf : // 113
         regle43 () ;
       break ;
-      case LEX_MJAVA.token_infeg : // 16075
+      case LEX_MJAVA.token_infeg : // 114
         regle43 () ;
       break ;
-      case LEX_MJAVA.token_sup : // 16076
+      case LEX_MJAVA.token_sup : // 115
         regle43 () ;
       break ;
-      case LEX_MJAVA.token_supeg : // 16077
+      case LEX_MJAVA.token_supeg : // 116
         regle43 () ;
       break ;
-      case LEX_MJAVA.token_eg : // 16078
+      case LEX_MJAVA.token_eg : // 117
         regle43 () ;
       break ;
-      case LEX_MJAVA.token_neg : // 16079
+      case LEX_MJAVA.token_neg : // 118
         regle43 () ;
       break ;
-      case LEX_MJAVA.token_affect : // 16061
+      case LEX_MJAVA.token_affect : // 100
         regle44 () ;
       break ;
-      case LEX_MJAVA.token_virg : // 16058
+      case LEX_MJAVA.token_virg : // 97
         regle44 () ;
       break ;
-      case LEX_MJAVA.token_pv : // 16059
+      case LEX_MJAVA.token_pv : // 98
         regle44 () ;
       break ;
-      case LEX_MJAVA.token_parf : // 16053
+      case LEX_MJAVA.token_parf : // 92
         regle44 () ;
       break ;
       default :

@@ -22,8 +22,10 @@ public class Method {
 	params.add(paramType);
     }
 
+    
+    
     @Override
-    public boolean equals(Method other) {
-	
+    public boolean equals(Object other) {
+    	return false;
     }
 }

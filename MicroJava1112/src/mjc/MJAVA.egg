@@ -5,13 +5,22 @@ option k=3;
 
 -- les attributs semantiques
 inh source : MJAVASourceFile for PROGRAMME;
-inh tds : TDS for ENTITES, DEFCLASSE, DEFINTERFACE, CORPS, DEF, DEFS, BLOC, MCORPS, INST, INSTS;
 
--- Permet de compter le nombre d'attributs d'une classe/interface, afin de savoir la taille
--- qu'elle va occuper en mémoire
-inh hnbAttr : INTEGER for CORPS, DEF, DEFS;
-syn nbAttr : INTEGER for CORPS, DEF, DEFS;
+-- La table des declarations. Accessible par (presque) tout le monde...
+-- Peut-on faire une variable globale au compilo ?
+inh tdd : TDD for ENTITES, DEFCLASSE, DEFINTERFACE, SUPER, ETEND, IMPL, CORPS, DEFS, DEF, TYPE, 
+            PARFS, PARF, PARFSX, MCORPS,  BLOC, INSTS, INST, E, AFFX, ER, ES, ERX, T, ESX, F, TX,
+            ARGS, ARGSX, Q, SIX;
 
+-- la classe courante
+inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, MCORPS;
+
+-- Le TYPAGE
+syn type : DTYPE for TYPE;
+-- La signature des methodes
+inh signature : Method for PARFS;
+
+inh tds : TDS for PARFS, MCORPS, BLOC, INST, INSTS;
 -- les terminaux 
 
 space separateur is  "[\r\n\t ]+";     
@@ -58,16 +67,17 @@ term entier is  "[0-9]+";
 term ident is  "[_A-Za-z][_0-9A-Za-z]*";
 
 ---------- REGLES DE PRODUCTION ----------------------------------------
+--The AXIOM
 PROGRAMME -> #init ENTITES #gen;
 global
    machine : AbstractMachine;
-   t : TDS;
+   t : ClassTable;
 #init {
 local
 do
    machine := PROGRAMME^source.getMachine();
-   t := new TDS();
-   ENTITES^tds := t;
+   t := new ClassTable();
+   ENTITES^tdd := t;
 end
 }
 
@@ -75,197 +85,356 @@ end
 local
 do
     call machine.writeCode(PROGRAMME^source.getFileName(), "");
-    write "tds " + t;
+    write "table des classes " + t;
 end
 }
 
+-- Entites : Declaration of classes and interfaces
 ENTITES -> ;
-ENTITES -> #tds DEFCLASSE ENTITES  ;
 
-#tds {
-do
-    DEFCLASSE^tds := ENTITES^tds;
-    ENTITES1^tds := ENTITES^tds;
-end
-}
+ENTITES -> DEFCLASSE ENTITES  ;
 
-ENTITES -> #tds DEFINTERFACE ENTITES  ;
-
-#tds {
-do
-    DEFINTERFACE^tds := ENTITES^tds;
-    ENTITES1^tds := ENTITES^tds;
-end
-}
+ENTITES -> DEFINTERFACE ENTITES  ;
 
 -- definition d'une classe
-DEFCLASSE -> classe ident SUPER #attr CORPS #tds;
+DEFCLASSE -> classe ident #check #down SUPER CORPS #tds;
 
-#attr {
+-- La classe.
+global
+    clazz : Clazz;
+    info : BOOLEAN;
+
+-- Verifie la validite de l'identifiant en tant que nom de classe
+#check{
 do
-    CORPS^tds := DEFCLASSE^tds;
-    CORPS^hnbAttr := 0;
+    info := DEFCLASSE^tdd.containsKey(ident^txt);
+    if info then
+        error(err_class_exists, ident^txt);
+    else
+        -- Rien a faire.
+    end    
 end
 }
 
-#tds {
-local
-    info : INFO;
-    t : DTYPE;
+-- Cree l'objet classe et le passe en attribut a SUPER et CORPS
+#down {
 do
-    info := DEFCLASSE^tds.chercherGlobalement(ident^txt);
-    if info /= nil then
-        error(err_ident_already_known, "La classe", ident^txt);
+    clazz := new Clazz(false);
+    SUPER^clazz := clazz;
+    CORPS^clazz := clazz;
+end
+}
+
+-- Ajoute la classe dans la table des classes. Verifie au passage qu'elle n'existe pas encore.
+#tds {
+do
+    if info then
+        error(err_class_exists, ident^txt);
     else
-        t := new DTYPE(ident^txt, CORPS^nbAttr);
-        call DEFCLASSE^tds.inserer(ident^txt, new INFOCLASS(t, false));
+        call DEFCLASSE^tdd.put(ident^txt, clazz);
     end
 end
 }
 
 --DEFCLASSE -> classe ident etend ident CORPS ;
 --DEFCLASSE -> classe ident implemente ident CORPS ;
-DEFINTERFACE -> interface ident SUPER #attr CORPS #tds;
+--DEFCLASSE -> classe ident etend ident implemente ident CORPS ;
+DEFINTERFACE -> interface ident #check #down SUPER CORPS #tds;
 
-#attr {
+-- La classe.
+global
+    clazz : Clazz;
+    info : BOOLEAN;
+
+-- Verifie la validite de l'identifiant en tant que nom de classe
+#check{
 do
-    CORPS^tds := DEFINTERFACE^tds;
-    CORPS^hnbAttr := 0;
+    info := DEFINTERFACE^tdd.containsKey(ident^txt);
+    if info then
+        error(err_class_exists, ident^txt);
+    else
+        -- Rien a faire.
+    end    
 end
 }
 
-#tds {
-local
-    info : INFO;
-    t : DTYPE;
+-- Cree l'objet classe et le passe en attribut a SUPER et CORPS
+#down {
 do
-    info := DEFINTERFACE^tds.chercherGlobalement(ident^txt);
-    if info /= nil then
-        error(err_ident_already_known, "L'interface", ident^txt);
+    clazz := new Clazz(false);
+    SUPER^clazz := clazz;
+    CORPS^clazz := clazz;
+end
+}
+
+-- Ajoute la classe dans la table des classes. Verifie au passage qu'elle n'existe pas encore.
+#tds {
+do
+    if info then
+        -- Ne fait rien puisque la declaration de la classe est invalide
     else
-        t := new DTYPE(ident^txt, CORPS^nbAttr);
-        call DEFINTERFACE^tds.inserer(ident^txt, new INFOCLASS(t, false));
+        call DEFINTERFACE^tdd.put(ident^txt, clazz);
     end
 end
 }
+
 --DEFINTERFACE -> interface ident etend ident CORPS;
 -- 1 extends maximum suivi d'un implements maximum
 SUPER -> ETEND IMPL ;
+
 ETEND -> ;
-ETEND -> etend ident ;
+
+ETEND -> etend ident #up ;
+
+-- Verifie la validite de l'extend et l'enregistre dans la classe
+#up{
+local
+    ext : Clazz;
+do
+    ext := ETEND^tdd.get(ident^txt);
+    if ETEND^clazz.canExtend(ext) then
+        call ETEND^clazz.setExtended(ext);
+    else
+        -- Une specification du message d'erreur en fonction du type de class (interface
+        -- ou classe concrete)
+        if ETEND^clazz.isInterfaze() then
+            error(err_interface_cannot_extend_class, ETEND^clazz.getName(), ext.getName());
+        else
+            error(err_class_cannot_extend_interface, ETEND^clazz.getName(), ext.getName());
+        end
+    end
+end
+}
+
 IMPL -> ;
-IMPL -> implemente ident ;
-CORPS -> aco #tds DEFS #attr acf ;
 
-global t : TDS;
-#tds {
+IMPL -> implemente ident #up ;
+
+-- Verifie la validite de l'implements et l'enregistre dans la classe
+#up{
+local
+    ext : Clazz;
 do
-    t := new TDS(CORPS^tds);
-    DEFS^tds  := t;
+    ext := IMPL^tdd.get(ident^txt);
+    if IMPL^clazz.canImplement(ext) then
+        call IMPL^clazz.setImplemented(ext);
+    else
+        -- Une specification du message d'erreur en fonction du type de class (interface
+        -- ou classe concrete)
+        if IMPL^clazz.isInterfaze() then
+            error(err_interface_cannot_implement_class, IMPL^clazz.getName(), ext.getName());
+        else
+            error(err_class_cannot_implement_interface, IMPL^clazz.getName(), ext.getName());
+        end
+    end
 end
 }
 
-#attr {
-do
-    CORPS^nbAttr := DEFS^nbAttr;
---    write "\n" + t;
-end
-}
+CORPS -> aco DEFS acf ;
+
 -- les attributs
-DEFS -> #attr  ;
-#attr {
-do
-    DEFS^nbAttr := DEFS^hnbAttr;
-end
-}
+DEFS -> ;
 
-DEFS ->  #tds DEF #attr DEFS #attr2 ;
-#tds {
-do
-    DEF^tds := DEFS^tds;
-    DEFS1^tds := DEFS^tds;
-    DEF^hnbAttr := DEFS^hnbAttr;
-end
-}
-#attr {
-do
-    DEFS1^hnbAttr := DEF^nbAttr;
-end
-}
-#attr2 {
-do
-    DEFS^nbAttr := DEF^nbAttr + DEFS1^nbAttr;
-end
-}
+DEFS -> DEF DEFS ;
 
 -- attribut
 DEF ->  TYPE ident pv #attr ;
+
+-- Ajoute un attribut.
 #attr {
-local
-info : INFO;
 do
-    info := DEF^tds.chercherLocalement(ident^txt);
-    if info /= nil then
-        error(err_ident_already_known, "L'attribut", ident^txt);
+    if DEF^clazz.hasAttribute(ident^txt) then
+        error(err_attribute_already_named, ident^txt);
     else
-    -- TODO: insérer l'attribut avec le bon type.
-        call DEF^tds.inserer(ident^txt, new INFO(new DTYPE(ident^txt, 1)));
-        DEF^nbAttr := 1;
+        call DEF^clazz.addAttribute(ident^txt, TYPE^type);
     end
 end
 }
 
 -- methode (fonction) 
-DEF ->  TYPE ident paro PARFS parf #tds MCORPS #attr ;
-#tds {
+DEF ->  TYPE ident paro #down PARFS parf #check #downbody MCORPS ;
+
+global
+    signature : Method;
+    valid : BOOLEAN;
+    tds : TDS;
+    
+-- Passe l'objet de signature a PARFS
+#down{
 do
-    MCORPS^tds := new TDS(DEF^tds);
+    signature := new Method(ident^txt, TYPE^type);
+    tds := new TDS();
+    PARFS^tds := tds;
+    PARFS^signature := signature;
 end
 }
 
-#attr {
+-- Verifie la validite de la signature
+#check{
 do
-    DEF^nbAttr := 0;
+    valid := DEF^clazz.addableMethod(signature);
+    if valid then
+        -- Rien a faire
+    else
+        -- Envoi d'un message d'erreur
+        -- TODO: Specifier un peu l'erreur.
+        -- #Maucais type de retour
+        -- #Signature deja existante a l'identique
+        error(err_wrong_signature, signature);
+    end
 end
 }
+
+-- Passe la tds au corps
+#downbody{
+do
+    MCORPS^tds := tds;
+end
+}
+
 -- methode (procedure)
-DEF ->  void ident paro PARFS parf #tds MCORPS #attr ;
-#tds {
+DEF ->  void ident paro #down PARFS parf #check #downbody MCORPS ;
+
+global
+    signature : Method;
+    valid : BOOLEAN;
+    tds : TDS;
+    
+-- Passe l'objet de signature ainsi qu'une tds a PARFS
+#down{
 do
-    MCORPS^tds := DEF^tds;
+    signature := new Method(ident^txt, nil);
+    tds := new TDS();
+    PARFS^tds := tds;
+    PARFS^signature := signature;
 end
 }
 
-#attr {
+-- Verifie la validite de la signature
+#check{
 do
-    DEF^nbAttr := 0;
+    valid := DEF^clazz.addableMethod(signature);
+    if valid then
+        -- Rien a faire
+    else
+        -- Envoi d'un message d'erreur
+        -- TODO: Specifier un peu l'erreur.
+        -- #Maucais type de retour
+        -- #Signature deja existante a l'identique
+        error(err_wrong_signature, signature);
+    end
 end
 }
+
+-- Passe la tds au corps
+#downbody{
+do
+    MCORPS^tds := tds;
+end
+}
+
 -- dans classe ou dans interface
-MCORPS -> pv ;
-MCORPS -> #tds BLOC ;
-#tds {
+MCORPS -> pv #check ;
+
+-- Verifie qu'on est dans une interface !
+#check{
 do
-    BLOC^tds := MCORPS^tds;
+    if MCORPS^clazz.isInterfaze() then
+        -- Rien a faire
+    else
+        -- TODO: Ecrire le message d'erreur
+    end
 end
 }
+
+MCORPS -> #check BLOC ;
+
+-- Verifie qu'on est dans une classe concrete !
+#check{
+do
+    if MCORPS^clazz.isInterfaze() then
+        -- TODO: Ecrire le message d'erreur
+    else
+        -- Rien a faire
+    end
+end
+}
+
+-- TODO: Under
+
 -- constructeur
-DEF -> ident paro PARFS parf #tds BLOC #attr ;
-#tds {
+DEF -> ident paro #down PARFS #check parf #downbody BLOC ;
+
+global
+    signature : Method;
+    valid : BOOLEAN;
+    tds : TDS;
+    
+-- Passe l'objet de signature ainsi qu'une tds a PARFS
+#down{
 do
-    BLOC^tds := new TDS(DEF^tds);
+    signature := new Method(ident^txt, nil);
+    tds := new TDS();
+    PARFS^tds := tds;
+    PARFS^signature := signature;
 end
 }
-#attr {
+
+-- Verifie la validite de la signature
+#check{
 do
-    DEF^nbAttr := 0;
+    valid := DEF^clazz.addableMethod(signature);
+    if valid then
+        -- Rien a faire
+    else
+        -- Envoi d'un message d'erreur
+        -- TODO: Specifier un peu l'erreur.
+        -- #Maucais type de retour
+        -- #Signature deja existante a l'identique
+        error(err_wrong_signature, signature);
+    end
 end
-} 
+}
+
+-- Passe la tds au corps
+#downbody{
+do
+    BLOC^tds := tds;
+end
+}
 
 -- les types
-TYPE-> int  ;
-TYPE-> bool ;
-TYPE-> ident ;
+TYPE-> int #type ;
+
+-- Set le type de TYPE
+#type{
+do
+    TYPE^type := new DTYPE("Integer", 1);
+end
+}
+
+TYPE-> bool #type ;
+
+-- Set le type de TYPE
+#type{
+do
+    TYPE^type := new DTYPE("Boolean", 1);
+end
+}
+
+TYPE-> ident #type ;
+
+-- Set le type de TYPE
+#type{
+local
+    clazz : DTYPE;
+do
+    clazz := TYPE^tdd.getClazz(ident^txt);
+    -- TODO : Creer une class Pointer
+    TYPE^type := new Pointer(clazz);
+end
+}
+
 -- parametres de methodes
 PARFS ->  ;
 PARFS ->  PARF PARFSX ;
@@ -273,12 +442,8 @@ PARFSX ->  ;
 PARFSX -> virg  PARF  PARFSX ;
 PARF ->  TYPE ident  ;
 -- corps de methode et bloc d'instructions
-BLOC ->  aco #tds INSTS acf  ;
-#tds {
-do
-    INSTS^tds := BLOC^tds;
-end
-}
+BLOC ->  aco INSTS acf  ;
+
 -- instructions
 INSTS ->   ;
 INSTS ->  INST INSTS  ;
@@ -289,17 +454,8 @@ INST ->  E pv ;
 -- bloc d'instructions
 INST ->  BLOC  ;
 -- conditionnelle
-INST ->  si paro E parf #tds BLOC SIX ;
-#tds {
-do 
-    BLOC^tds := new TDS();
-end
-}
-SIX ->   sinon #tds BLOC ;
-#tds {
-do
-    BLOC^tds := new TDS();
-end}
+INST ->  si paro E parf BLOC SIX ;
+
 SIX ->;
 -- return
 INST ->  retour E pv ;
@@ -354,6 +510,10 @@ Q ->  ;
 Q ->  pt ident  Q ;
 -- arguments d'appel de methode
 Q ->  paro ARGS parf Q ;
+
+-- Pourquoi est-ce en double ? Erreur de ma part ?
+-- -- arguments d'appel de methode
+-- Q ->  paro ARGS parf Q ;
 ARGS ->  E ARGSX  ;
 ARGS -> ;
 ARGSX ->   virg E ARGSX  ;

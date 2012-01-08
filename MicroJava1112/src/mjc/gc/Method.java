@@ -44,7 +44,9 @@ public class Method {
     	// Vérification de la concordance du type de chaque paramètre
     	if (this.params.size() == ((Method)other).params.size()) {
     		while (selfI.hasNext() && otherI.hasNext()) {
-    			if (((DTYPE)selfI.next()).getName() != ((DTYPE)otherI.next()).getName()) {
+    			String selfName = ((DTYPE)selfI.next()).getName();
+    			String otherName = ((DTYPE)otherI.next()).getName();
+    			if (!selfName.equals(otherName)) {
     				params = false;
     			}
     		}
@@ -53,11 +55,11 @@ public class Method {
     		params = false;
     	}
     	// Vérification de la concordance des types de retour
-    	returnType = this.returnType == ((Method)other).returnType;
+    	returnType = this.returnType.getName().equals(((Method)other).returnType.getName());
     	
     	// Vérification de la concordance des noms
-    	name = this.name == ((Method)other).name;
+    	name = (this.name.equals(((Method)other).name));
     	
-    	return params && returnType && name;
+    	return (params && returnType && name);
     }
 }

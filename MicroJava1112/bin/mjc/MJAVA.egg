@@ -264,9 +264,12 @@ global
     tds : TDS;
     
 -- Verifie la bonne denomination de la methode
-#checkname{
+#checkname {
+local
+    ClassName : String;
 do
-    if DEF^clazz.getName() = ident^txt then
+    ClassName := DEF^clazz.getName();
+    if ClassName.equals(ident^txt) then
         error(err_meth_name, DEF^clazz.getName());
     end
 end
@@ -285,10 +288,12 @@ end
 -- Verifie la validite de la signature
 #check{
 do
+    -- addableMethod à revoir :/
     valid := DEF^clazz.addableMethod(signature);
     if valid then
         call DEF^clazz.addMethod(signature);
     else
+        write("lul\n");
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
         -- #Mauvais type de retour
@@ -315,8 +320,11 @@ global
     
 -- Verifie la bonne denomination de la methode
 #checkname{
+local
+    ClassName : String;
 do
-    if DEF^clazz.getName() = ident^txt then
+    ClassName := DEF^clazz.getName();
+    if ClassName.equals(ident^txt) then
         error(err_meth_name, DEF^clazz.getName());
     end
 end
@@ -325,7 +333,7 @@ end
 -- Passe l'objet de signature ainsi qu'une tds a PARFS
 #down{
 do
-    signature := new Method(ident^txt, nil);
+    signature := new Method(ident^txt, new DTYPE("Void", 0));
     tds := new TDS();
     PARFS^tds := tds;
     PARFS^signature := signature;

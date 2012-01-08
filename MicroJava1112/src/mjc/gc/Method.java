@@ -1,6 +1,7 @@
 package mjc.gc;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Method {
     // Le nom de la méthode
@@ -29,9 +30,34 @@ public class Method {
     public void addArgument(DTYPE paramType) {
     	params.add(paramType);
     }
-    
+
     @Override
     public boolean equals(Object other) {
-    	return false;
+    	// Les méthodes ont-elles la même liste de paramètres, le même type de retour et le même nom?
+    	boolean params = true;
+    	boolean returnType = true;
+    	boolean name = true;
+
+    	
+    	Iterator<DTYPE> selfI = this.params.iterator();
+    	Iterator<DTYPE> otherI = ((Method)other).params.iterator();
+    	// Vérification de la concordance du type de chaque paramètre
+    	if (this.params.size() == ((Method)other).params.size()) {
+    		while (selfI.hasNext() && otherI.hasNext()) {
+    			if (((DTYPE)selfI.next()).getName() != ((DTYPE)otherI.next()).getName()) {
+    				params = false;
+    			}
+    		}
+    	}
+    	else {
+    		params = false;
+    	}
+    	// Vérification de la concordance des types de retour
+    	returnType = this.returnType == ((Method)other).returnType;
+    	
+    	// Vérification de la concordance des noms
+    	name = this.name == ((Method)other).name;
+    	
+    	return params && returnType && name;
     }
 }

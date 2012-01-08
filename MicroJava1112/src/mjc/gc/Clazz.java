@@ -1,8 +1,9 @@
 package mjc.gc;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
+
 
 /**
  * Permet de définir la déclaration d'une classe.
@@ -49,6 +50,10 @@ public class Clazz extends DTYPE {
 		attributes.put(name, type);
 		taille += type.getTaille();
 	}
+	
+	public void addMethod(Method m) {
+		methods.add(m);
+	}
 
 	public void setImplemented(Clazz other) {
 		implemented = other;
@@ -75,8 +80,15 @@ public class Clazz extends DTYPE {
 	}
 	
 	public boolean addableMethod(Method m) {
-		// TODO: Définir les règles d'ajout d'une méthode.
-		return true;
+		boolean valid = true;
+		Method m_list;
+		for (Iterator<Method> i = methods.iterator(); i.hasNext();) {
+			m_list = i.next();
+			if (m.equals(m_list)) {
+				valid = false;
+			}
+		}
+		return valid;
 	}
 	
 	public boolean addableConstructor(Method m) {

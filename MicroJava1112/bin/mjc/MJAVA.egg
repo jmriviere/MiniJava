@@ -203,14 +203,14 @@ IMPL -> implemente ident #up ;
 -- Verifie la validite de l'implements et l'enregistre dans la classe
 #up{
 local
-    ext : Clazz;
+    impl : Clazz;
 do
-    ext := IMPL^tdd.get(ident^txt);
+    impl := IMPL^tdd.get(ident^txt);
     -- Vérifie qu'on peut implémenter l'identifiant spécifié.
-    if IMPL^clazz.canImplement(ext) then
+    if IMPL^clazz.canImplement(impl) then
         -- Vérifie qu'on n'implémente qu'une seule interface.
         if IMPL^clazz.getImplemented() = nil then
-            call IMPL^clazz.setImplemented(ext);
+            call IMPL^clazz.setImplemented(impl);
         else
             error(err_max_impl_one, IMPL^clazz.getName());
         end
@@ -218,7 +218,7 @@ do
         -- Une specification du message d'erreur en fonction du type de class (interface
         -- ou classe concrete)
         if IMPL^clazz.isInterfaze() then
-            error(err_interface_cannot_implement_class, IMPL^clazz.getName(), ext.getName());
+            error(err_interface_cannot_implement_class, IMPL^clazz.getName(), impl.getName());
         end
     end
 end
@@ -257,7 +257,7 @@ global
 #checkname{
 do
     if DEF^clazz.getName() = ident^txt then
-        -- TODO: genere une erreur WRONG NAME (METHOD)
+        error(err_meth_name, DEF^clazz.getName());
     end
 end
 }
@@ -277,7 +277,7 @@ end
 do
     valid := DEF^clazz.addableMethod(signature);
     if valid then
-        -- Rien a faire
+        call DEF^clazz.addMethod(signature);
     else
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
@@ -307,7 +307,7 @@ global
 #checkname{
 do
     if DEF^clazz.getName() = ident^txt then
-        -- TODO: genere une erreur WRONG NAME (METHOD)
+        error(err_meth_name, DEF^clazz.getName());
     end
 end
 }
@@ -327,7 +327,7 @@ end
 do
     valid := DEF^clazz.addableMethod(signature);
     if valid then
-        -- Rien a faire
+        call DEF^clazz.addMethod(signature);
     else
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
@@ -354,7 +354,7 @@ do
     if MCORPS^clazz.isInterfaze() then
         -- Rien a faire
     else
-        -- TODO: Ecrire le message d'erreur
+        error(err_meth_not_specified, MCORPS^clazz.getName());
     end
 end
 }
@@ -365,7 +365,9 @@ MCORPS -> #check BLOC ;
 #check{
 do
     if MCORPS^clazz.isInterfaze() then
-        -- TODO: Ecrire le message d'erreur
+        error(err_meth_body_in_interface, MCORPS^clazz.getName());
+    else
+        -- Rien à faire
     end
 end
 }
@@ -382,10 +384,10 @@ global
 #checkname{
 do
     if DEF^clazz.isInterfaze() then
-        -- TODO: Ecrire le message d'erreur
+        error(err_interface_constructor, DEF^clazz.getName());
     end
     if DEF^clazz.getName() /= ident^txt then
-        -- TODO: Ecrire le message d'erreur. WRONG NAME (CONSTRUCTOR)
+        error(err_constructor_name, DEF^clazz.getName());
     end
 end
 }

@@ -3,6 +3,7 @@ package mjc.gc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Collection;
 
 
 /**
@@ -68,6 +69,7 @@ public class Clazz extends DTYPE {
 
 	public void setExtended(Clazz other) {
 		extended = other;
+		taille += other.getTaille();
 	}
 	
 	public Clazz getImplemented() {

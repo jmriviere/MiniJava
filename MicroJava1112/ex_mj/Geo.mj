@@ -46,7 +46,7 @@ class Point {
   }
 
 
-class PointCol extends Point {
+class PointCol {
   int col;
 
   PointCol (int xi,int yi, int ci) {

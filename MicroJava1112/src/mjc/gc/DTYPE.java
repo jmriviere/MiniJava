@@ -1,11 +1,7 @@
 package mjc.gc;
 
 public class DTYPE {
-	// inutilisable avec EGG
-	// final private DTYPE entier = new DTYPE("entier",4);
-	// public DTYPE getTypeEntier(){return entier;}
-	// final private DTYPE booleen = new DTYPE("booleen",1);
-	// public DTYPE getTypeBooleen(){return booleen;}
+	
 	protected int taille;
 
 	public int getTaille() {
@@ -14,7 +10,7 @@ public class DTYPE {
 
 	protected String nom;
 
-	public String getNom() {
+	public String getName() {
 		return nom;
 	}
 

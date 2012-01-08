@@ -16,11 +16,13 @@ inh tdd : TDD for ENTITES, DEFCLASSE, DEFINTERFACE, SUPER, ETEND, IMPL, CORPS, D
 inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, MCORPS;
 
 -- Le TYPAGE
-syn type : DTYPE for TYPE;
--- La signature des methodes
-inh signature : Method for PARFS;
+syn type : DTYPE for TYPE, AFFX, E, ER, ERX, ES, ESX, T, TX, F; --, Q;
+inh ltype : DTYPE for ERX, ESX, TX; --, Q;
 
-inh tds : TDS for PARFS, MCORPS, BLOC, INST, INSTS;
+-- La signature des methodes
+inh signature : Method for PARFS, PARFSX, PARF;
+
+inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS;
 -- les terminaux 
 
 space separateur is  "[\r\n\t ]+";     
@@ -71,12 +73,12 @@ term ident is  "[_A-Za-z][_0-9A-Za-z]*";
 PROGRAMME -> #init ENTITES #gen;
 global
    machine : AbstractMachine;
-   t : ClassTable;
+   t : TDD;
 #init {
 local
 do
    machine := PROGRAMME^source.getMachine();
-   t := new ClassTable();
+   t := new TDD();
    ENTITES^tdd := t;
 end
 }
@@ -119,7 +121,7 @@ end
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
 do
-    clazz := new Clazz(false);
+    clazz := new Clazz(ident^txt, false);
     SUPER^clazz := clazz;
     CORPS^clazz := clazz;
 end
@@ -161,7 +163,7 @@ end
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
 do
-    clazz := new Clazz(false);
+    clazz := new Clazz(ident^txt, false);
     SUPER^clazz := clazz;
     CORPS^clazz := clazz;
 end
@@ -252,13 +254,22 @@ end
 }
 
 -- methode (fonction) 
-DEF ->  TYPE ident paro #down PARFS parf #check #downbody MCORPS ;
+DEF ->  TYPE ident #checkname paro #down PARFS parf #check #downbody MCORPS ;
 
 global
     signature : Method;
     valid : BOOLEAN;
     tds : TDS;
     
+-- Verifie la bonne denomination de la methode
+#checkname{
+do
+    if DEF^clazz.getName() = ident^txt then
+        -- TODO: genere une erreur WRONG NAME (METHOD)
+    end
+end
+}
+
 -- Passe l'objet de signature a PARFS
 #down{
 do
@@ -278,7 +289,7 @@ do
     else
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
-        -- #Maucais type de retour
+        -- #Mauvais type de retour
         -- #Signature deja existante a l'identique
         error(err_wrong_signature, signature);
     end
@@ -293,13 +304,22 @@ end
 }
 
 -- methode (procedure)
-DEF ->  void ident paro #down PARFS parf #check #downbody MCORPS ;
+DEF ->  void ident #checkname paro #down PARFS parf #check #downbody MCORPS ;
 
 global
     signature : Method;
     valid : BOOLEAN;
     tds : TDS;
     
+-- Verifie la bonne denomination de la methode
+#checkname{
+do
+    if DEF^clazz.getName() = ident^txt then
+        -- TODO: genere une erreur WRONG NAME (METHOD)
+    end
+end
+}
+
 -- Passe l'objet de signature ainsi qu'une tds a PARFS
 #down{
 do
@@ -319,7 +339,7 @@ do
     else
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
-        -- #Maucais type de retour
+        -- #Mauvais type de retour
         -- #Signature deja existante a l'identique
         error(err_wrong_signature, signature);
     end
@@ -354,26 +374,34 @@ MCORPS -> #check BLOC ;
 do
     if MCORPS^clazz.isInterfaze() then
         -- TODO: Ecrire le message d'erreur
-    else
-        -- Rien a faire
     end
 end
 }
 
--- TODO: Under
-
 -- constructeur
-DEF -> ident paro #down PARFS #check parf #downbody BLOC ;
+DEF -> ident #checkname paro #down PARFS #check parf #downbody BLOC ;
 
 global
     signature : Method;
     valid : BOOLEAN;
     tds : TDS;
+
+-- Verifie qu'on est dans une classe concrete ainsi que la bonne denomination du constructeur.
+#checkname{
+do
+    if DEF^clazz.isInterfaze() then
+        -- TODO: Ecrire le message d'erreur
+    end
+    if DEF^clazz.getName() /= ident^txt then
+        -- TODO: Ecrire le message d'erreur. WRONG NAME (CONSTRUCTOR)
+    end
+end
+}
     
 -- Passe l'objet de signature ainsi qu'une tds a PARFS
 #down{
 do
-    signature := new Method(ident^txt, nil);
+    signature := new Method(ident^txt, DEF^clazz);
     tds := new TDS();
     PARFS^tds := tds;
     PARFS^signature := signature;
@@ -383,13 +411,12 @@ end
 -- Verifie la validite de la signature
 #check{
 do
-    valid := DEF^clazz.addableMethod(signature);
+    valid := DEF^clazz.addableConstructor(signature);
     if valid then
         -- Rien a faire
     else
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
-        -- #Maucais type de retour
         -- #Signature deja existante a l'identique
         error(err_wrong_signature, signature);
     end
@@ -429,9 +456,13 @@ TYPE-> ident #type ;
 local
     clazz : DTYPE;
 do
-    clazz := TYPE^tdd.getClazz(ident^txt);
-    -- TODO : Creer une class Pointer
-    TYPE^type := new Pointer(clazz);
+    clazz := TYPE^tdd.get(ident^txt);
+    if clazz /= nil then
+        -- TODO : Creer une class Pointer
+        TYPE^type := clazz;
+    else
+        -- TODO: generer une erreur
+    end
 end
 }
 
@@ -440,35 +471,164 @@ PARFS ->  ;
 PARFS ->  PARF PARFSX ;
 PARFSX ->  ;
 PARFSX -> virg  PARF  PARFSX ;
-PARF ->  TYPE ident  ;
+PARF ->  TYPE ident #sign ;
+
+-- Ajoute l'element dans la tds et dans la signature
+#sign{
+do
+    call PARF^signature.addArgument(TYPE^type);
+    call PARF^tds.inserer(ident^txt, new INFO(TYPE^type));
+end
+}
+
 -- corps de methode et bloc d'instructions
-BLOC ->  aco INSTS acf  ;
+BLOC ->  aco INSTS acf ;
 
 -- instructions
-INSTS ->   ;
-INSTS ->  INST INSTS  ;
+INSTS -> ;
+
+INSTS -> INST INSTS ;
+
 -- declaration de variable locale avec ou sans init
-INST->  TYPE ident AFFX pv ;
+INST-> TYPE ident #check AFFX pv #checktype ;
+
+-- Teste l'absence de ident dans la tds
+-- et dans la tdd.
+-- TODO: Choisir si on accepte le hidding.
+-- Manu: Etant donne qu'on a pas de mot clef this ou super, je pense qu'il vaut mieux le refuser
+#check{
+local
+    info : INFO;
+do
+    info := INST^tds.chercherGlobalement(ident^txt);
+    if info /= nil then
+        -- TODO: genere le message d'erreur EXISTING
+    else
+        if INST^tdd.containsKey(ident^txt) then
+            -- TODO: generer un message d'erreur HIDDING
+        end
+    end
+end
+}
+
+-- Teste la compatibilite des types et affecte ident dans la tds.
+#checktype{
+do
+    if AFFX^type.compareTo(TYPE^type) then
+        call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
+    else
+        -- TODO: genere un message d'erreur
+    end
+end
+}
+
 -- instruction expression
 INST ->  E pv ;
+
 -- bloc d'instructions
-INST ->  BLOC  ;
+INST -> #tds BLOC ;
+
+-- Genere une sous tds pour le bloc
+#tds{
+do
+    BLOC^tds := new TDS(INST^tds);
+end
+}
+
 -- conditionnelle
-INST ->  si paro E parf BLOC SIX ;
+INST -> si paro E parf BLOC SIX ;
 
 SIX ->;
 -- return
 INST ->  retour E pv ;
+
 -- les expressions
-E ->  ER AFFX ;
+E ->  ER AFFX #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    E^type := AFFX^type;
+end
+}
+
 -- affectation
-AFFX ->  affect ER  ;
-AFFX -> ;
+AFFX ->  affect ER #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    AFFX^type := ER^type;
+end
+}
+
+AFFX -> #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    AFFX^type := nil;
+end
+}
+
 -- relation
-ER ->   ES ERX ;
-ES ->  T ESX ;
-ERX ->  OPREL ES ;
-ERX -> ;
+ER -> ES #down ERX #up ;
+
+-- Passe le type de gauche a ERX
+#down{
+do
+    ERX^ltype := ES^type;
+end
+}
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    ER^type := ERX^type;
+end
+}
+
+ES ->  T #down ESX #up ;
+
+-- Passe le type de gauche a ESX
+#down{
+do
+    ESX^ltype := T^type;
+end
+}
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    ES^type := ESX^type;
+end
+}
+
+ERX ->  OPREL ES #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    ERX^type := new DTYPE("Boolean", 1);
+end
+}
+
+ERX -> #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    ERX^type := ERX^ltype;
+end
+}
+
 OPREL -> inf ;
 OPREL -> infeg ;
 OPREL -> sup ;
@@ -476,38 +636,184 @@ OPREL -> supeg ;
 OPREL -> eg ;
 OPREL -> neg ;
 -- addition, ...
-ESX ->   OPADD T ESX ;
-ESX ->;
+ESX ->   OPADD T ESX #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    ESX^type := ESX1^type;
+end
+}
+
+ESX -> #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    ESX^type := ESX^ltype;
+end
+}
+
 OPADD -> plus ;
 OPADD -> moins ;
 OPADD -> ou ;
-T ->  F TX ;
+T ->  F #down TX #up ;
+
+-- Passe le type de gauche a ESX
+#down{
+do
+    TX^ltype := F^type;
+end
+}
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    T^type := TX^type;
+end
+}
+
 -- multiplication, ...
-TX ->   OPMUL F TX ;
-TX -> ;
+TX -> OPMUL F TX #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    TX^type := TX1^type;
+end
+}
+
+TX -> #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    TX^type := TX^ltype;
+end
+}
+
 OPMUL -> mult ;
 OPMUL -> div ;
 OPMUL -> mod ;
 OPMUL -> et ;
 -- expressions de base
-F -> entier  ;
-F -> vrai  ;
-F -> faux  ;
+F -> entier #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    F^type := new DTYPE("Integer", 1);
+end
+}
+
+F -> vrai #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    F^type := new DTYPE("Boolean", 1);
+end
+}
+
+F -> faux #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    F^type := new DTYPE("Boolean", 1);
+end
+}
+
 -- unaire
-F ->  OPUN F ;
+F ->  OPUN F #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    -- TODO: Gerer la modification eventuelle par operation
+    F^type := F1^type;
+end
+}
+
 OPUN -> plus;
 OPUN -> moins;
 OPUN -> non;
 -- null
-F -> null  ;
-F ->  paro E parf ;
+F -> null #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    -- TODO: Gerer la modification eventuelle par operation
+    F^type := nil;
+end
+}
+
+F ->  paro E parf #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    F^type := E^type;
+end
+}
+
 -- new
-F -> nouveau  TYPE paro ARGS parf  ;
-F ->  ident Q ;
+F -> nouveau TYPE paro ARGS parf #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    F^type := TYPE^type;
+end
+}
+
+F ->  ident #down Q #up ;
+
+-- Passe le type de gauche a Q
+#down{
+local
+    info : INFO;
+do
+   -- info := Q^tds.chercherGlobalement(ident^txt);
+   -- Q^ltype := info.getType();
+end
+}
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+    F^type := new DTYPE("test", 1); --Q^type;
+end
+}
+
 -- Q = qualificateur de variable
-Q ->  ;
+Q -> #up ;
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+   -- Q^type := Q^ltype;
+end
+}
+
 -- acces attribut
 Q ->  pt ident  Q ;
+
 -- arguments d'appel de methode
 Q ->  paro ARGS parf Q ;
 

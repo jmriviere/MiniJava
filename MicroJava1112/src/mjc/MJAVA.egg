@@ -16,8 +16,8 @@ inh tdd : TDD for ENTITES, DEFCLASSE, DEFINTERFACE, SUPER, ETEND, IMPL, CORPS, D
 inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, MCORPS;
 
 -- Le TYPAGE
-syn type : DTYPE for TYPE, AFFX, E, ER, ERX, ES, ESX, T, TX, F, Q;
-inh ltype : DTYPE for ERX, ESX, TX, Q;
+syn type : DTYPE for TYPE, AFFX, E, ER, ERX, ES, ESX, T, TX, F; --, Q;
+inh ltype : DTYPE for ERX, ESX, TX; --, Q;
 
 -- La signature des methodes
 inh signature : Method for PARFS, PARFSX, PARF;
@@ -73,12 +73,12 @@ term ident is  "[_A-Za-z][_0-9A-Za-z]*";
 PROGRAMME -> #init ENTITES #gen;
 global
    machine : AbstractMachine;
-   t : ClassTable;
+   t : TDD;
 #init {
 local
 do
    machine := PROGRAMME^source.getMachine();
-   t := new ClassTable();
+   t := new TDD();
    ENTITES^tdd := t;
 end
 }
@@ -121,7 +121,7 @@ end
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
 do
-    clazz := new Clazz(false);
+    clazz := new Clazz(ident^txt, false);
     SUPER^clazz := clazz;
     CORPS^clazz := clazz;
 end
@@ -163,7 +163,7 @@ end
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
 do
-    clazz := new Clazz(false);
+    clazz := new Clazz(ident^txt, false);
     SUPER^clazz := clazz;
     CORPS^clazz := clazz;
 end
@@ -401,7 +401,7 @@ end
 -- Passe l'objet de signature ainsi qu'une tds a PARFS
 #down{
 do
-    signature := new Method(ident^txt, new Pointer(DEF^clazz));
+    signature := new Method(ident^txt, DEF^clazz);
     tds := new TDS();
     PARFS^tds := tds;
     PARFS^signature := signature;
@@ -456,10 +456,10 @@ TYPE-> ident #type ;
 local
     clazz : DTYPE;
 do
-    clazz := TYPE^tdd.getClazz(ident^txt);
+    clazz := TYPE^tdd.get(ident^txt);
     if clazz /= nil then
         -- TODO : Creer une class Pointer
-        TYPE^type := new Pointer(clazz);
+        TYPE^type := clazz;
     else
         -- TODO: generer une erreur
     end
@@ -477,7 +477,7 @@ PARF ->  TYPE ident #sign ;
 #sign{
 do
     call PARF^signature.addArgument(TYPE^type);
-    call PARF^tds.add(ident^txt, new INFO(TYPE^type));
+    call PARF^tds.inserer(ident^txt, new INFO(TYPE^type));
 end
 }
 
@@ -514,8 +514,8 @@ end
 -- Teste la compatibilite des types et affecte ident dans la tds.
 #checktype{
 do
-    if AFFX^type.isType(TYPE^type) then
-        call INST^tds.inserer(ident^txt, new INFO(TYPE^type, AFFX^type));
+    if AFFX^type.compareTo(TYPE^type) then
+        call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
     else
         -- TODO: genere un message d'erreur
     end
@@ -770,7 +770,7 @@ end
 }
 
 -- new
-F -> nouveau TYPE #checktype paro ARGS parf #checkconstructor #up ;
+F -> nouveau TYPE paro ARGS parf #up ;
 
 -- Remonte les attributs :
 --  * type
@@ -787,8 +787,8 @@ F ->  ident #down Q #up ;
 local
     info : INFO;
 do
-    info := Q^tds.chercherGlobalement(ident^txt);
-    Q^ltype := info.getType();
+   -- info := Q^tds.chercherGlobalement(ident^txt);
+   -- Q^ltype := info.getType();
 end
 }
 
@@ -796,7 +796,7 @@ end
 --  * type
 #up{
 do
-    F^type := Q^type;
+    F^type := new DTYPE("test", 1); --Q^type;
 end
 }
 
@@ -807,7 +807,7 @@ Q -> #up ;
 --  * type
 #up{
 do
-    Q^type := Q^ltype;
+   -- Q^type := Q^ltype;
 end
 }
 

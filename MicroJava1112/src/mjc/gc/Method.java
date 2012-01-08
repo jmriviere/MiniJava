@@ -18,11 +18,17 @@ public class Method {
 	params = new ArrayList<DTYPE>();
     }
 
-    public void addParam(DTYPE paramType) {
-	params.add(paramType);
+    public String getName() {
+    	return name;
     }
-
     
+    public void addParam(DTYPE paramType) {
+    	params.add(paramType);
+    }
+    
+    public void addArgument(DTYPE paramType) {
+    	params.add(paramType);
+    }
     
     @Override
     public boolean equals(Object other) {

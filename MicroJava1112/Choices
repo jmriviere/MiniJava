@@ -1,0 +1,19 @@
+
+
+Ambiguite & choix \\
+\hline
+extend (interface ou classe) & une interface ne peut qu'etendre un autre interface \\
+ & une classe concrete peut etendre une autre classe concrete et/ou implementer une interface \\
+\hline
+Surcharge & Une methode surchargee doit avoir le meme type de retour et des arguments de type different (l'ordre compte) \\
+\hline
+Definition de methodes & Dans une classe toute methode doit etre completement definie ! \\
+ & Dans une interface aucune methode ne peut etre completement definie. \\
+\hline
+Constructeur & il ne peut etre defini que dans une classe concrete \\
+\hline
+Nommage des Methodes & Il est interdit de nommer une methode classique du nom de la classe.\\
+ & Il est obligatoire de nommer les constructeurs du nom de la classe \\
+\hline
+Retour d'affectations & une affectation retourne l'element affecte \\
+\hline

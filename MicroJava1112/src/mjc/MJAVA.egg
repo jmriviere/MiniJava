@@ -407,12 +407,9 @@ end
 do
     valid := DEF^clazz.addableConstructor(signature);
     if valid then
-        -- Rien a faire
+        call DEF^clazz.addConstructor(signature);
     else
-        -- Envoi d'un message d'erreur
-        -- TODO: Specifier un peu l'erreur.
-        -- #Signature deja existante a l'identique
-        error(err_wrong_signature, signature);
+        error(err_constructor, DEF^clazz.getName());
     end
 end
 }
@@ -452,10 +449,9 @@ local
 do
     clazz := TYPE^tdd.get(ident^txt);
     if clazz /= nil then
-        -- TODO : Creer une class Pointer
         TYPE^type := clazz;
     else
-        -- TODO: generer une erreur
+        error(err_unknown_class, ident^txt);
     end
 end
 }
@@ -470,6 +466,7 @@ PARF ->  TYPE ident #sign ;
 -- Ajoute l'element dans la tds et dans la signature
 #sign{
 do
+    -- TODO: Vérifier que l'argument n'existe pas déjà dans la tds.
     call PARF^signature.addArgument(TYPE^type);
     call PARF^tds.inserer(ident^txt, new INFO(TYPE^type));
 end

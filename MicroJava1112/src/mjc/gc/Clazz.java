@@ -23,6 +23,8 @@ public class Clazz extends DTYPE {
 
 	// Contient la liste des méthodes définies
 	private ArrayList<Method> methods;
+	
+	private ArrayList<Method> constructors;
 
 	// Spécifie respectivement la classe implémentée et l'interface étendue.
 	private Clazz implemented, extended;
@@ -32,6 +34,7 @@ public class Clazz extends DTYPE {
 		this.interfaze = interfaze;
 		attributes = new HashMap<String, DTYPE>();
 		methods = new ArrayList<Method>();
+		constructors = new ArrayList<Method>();
 	}
 	
 	public boolean isInterfaze() {
@@ -53,6 +56,10 @@ public class Clazz extends DTYPE {
 	
 	public void addMethod(Method m) {
 		methods.add(m);
+	}
+	
+	public void addConstructor(Method m) {
+		constructors.add(m);
 	}
 
 	public void setImplemented(Clazz other) {
@@ -92,7 +99,15 @@ public class Clazz extends DTYPE {
 	}
 	
 	public boolean addableConstructor(Method m) {
-		return m.getName() == name;
+		boolean valid = true;
+		Method m_list;
+		for (Iterator<Method> i = constructors.iterator(); i.hasNext();) {
+			m_list = i.next();
+			if (m.equals(m_list)) {
+				valid = false;
+			}
+		}
+		return valid;
 	}
 	
 }

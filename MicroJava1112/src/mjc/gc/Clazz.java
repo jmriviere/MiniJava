@@ -47,6 +47,7 @@ public class Clazz extends DTYPE {
 
 	public void addAttribute(String name, DTYPE type) {
 		attributes.put(name, type);
+		taille += type.getTaille();
 	}
 
 	public void setImplemented(Clazz other) {
@@ -55,17 +56,6 @@ public class Clazz extends DTYPE {
 
 	public void setExtended(Clazz other) {
 		extended = other;
-	}
-
-	/**
-	 * *
-	 * @param taille
-	 * Permet de spécifier la taille mémoire occupée par une instance de la classe
-	 * créée une fois qu'on l'a calculée. En effet, ce calcul ne se fait pas à
-	 * l'instanciation de l'objet Clazz correspondant.
-	 */
-	public void setTaille(int taille) {
-		this.taille = taille;
 	}
 	
 	public Clazz getImplemented() {

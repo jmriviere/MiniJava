@@ -22,7 +22,7 @@ inh ltype : DTYPE for ERX, ESX, TX; --, Q;
 -- La signature des methodes
 inh signature : Method for PARFS, PARFSX, PARF;
 
-inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS;
+inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS, SIX;
 -- les terminaux 
 
 space separateur is  "[\r\n\t ]+";     
@@ -99,24 +99,12 @@ ENTITES -> DEFCLASSE ENTITES  ;
 ENTITES -> DEFINTERFACE ENTITES  ;
 
 -- definition d'une classe
-DEFCLASSE -> classe ident #check #down SUPER CORPS #tds;
+DEFCLASSE -> classe ident #down SUPER CORPS #tds;
 
 -- La classe.
 global
     clazz : Clazz;
     info : BOOLEAN;
-
--- Verifie la validite de l'identifiant en tant que nom de classe
-#check{
-do
-    info := DEFCLASSE^tdd.containsKey(ident^txt);
-    if info then
-        error(err_class_exists, ident^txt);
-    else
-        -- Rien a faire.
-    end    
-end
-}
 
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
@@ -130,9 +118,12 @@ end
 -- Ajoute la classe dans la table des classes. Verifie au passage qu'elle n'existe pas encore.
 #tds {
 do
+    -- Vérifie que l'identifiant de la classe n'existe pas déjà.
+    info := DEFCLASSE^tdd.containsKey(ident^txt);
     if info then
         error(err_class_exists, ident^txt);
     else
+        -- Ajout à la table des déclarations.
         call DEFCLASSE^tdd.put(ident^txt, clazz);
     end
 end
@@ -141,24 +132,12 @@ end
 --DEFCLASSE -> classe ident etend ident CORPS ;
 --DEFCLASSE -> classe ident implemente ident CORPS ;
 --DEFCLASSE -> classe ident etend ident implemente ident CORPS ;
-DEFINTERFACE -> interface ident #check #down SUPER CORPS #tds;
+DEFINTERFACE -> interface ident #down SUPER CORPS #tds;
 
 -- La classe.
 global
     clazz : Clazz;
     info : BOOLEAN;
-
--- Verifie la validite de l'identifiant en tant que nom de classe
-#check{
-do
-    info := DEFINTERFACE^tdd.containsKey(ident^txt);
-    if info then
-        error(err_class_exists, ident^txt);
-    else
-        -- Rien a faire.
-    end    
-end
-}
 
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
@@ -172,9 +151,12 @@ end
 -- Ajoute la classe dans la table des classes. Verifie au passage qu'elle n'existe pas encore.
 #tds {
 do
+    -- Vérifie que l'identifiant de l'interface n'existe pas déjà.
+    info := DEFINTERFACE^tdd.containsKey(ident^txt);
     if info then
         -- Ne fait rien puisque la declaration de la classe est invalide
     else
+        -- Ajout à la table de déclarations.
         call DEFINTERFACE^tdd.put(ident^txt, clazz);
     end
 end
@@ -194,8 +176,14 @@ local
     ext : Clazz;
 do
     ext := ETEND^tdd.get(ident^txt);
+    -- Vérifie qu'on peut hériter de l'identifiant spécifié.
     if ETEND^clazz.canExtend(ext) then
-        call ETEND^clazz.setExtended(ext);
+        -- Vérifie qu'on n'hérite que d'une seule classe.
+        if ETEND^clazz.getExtended() = nil then
+            call ETEND^clazz.setExtended(ext);
+        else
+            error(err_max_ext_one, ETEND^clazz.getName());
+        end
     else
         -- Une specification du message d'erreur en fonction du type de class (interface
         -- ou classe concrete)
@@ -218,15 +206,19 @@ local
     ext : Clazz;
 do
     ext := IMPL^tdd.get(ident^txt);
+    -- Vérifie qu'on peut implémenter l'identifiant spécifié.
     if IMPL^clazz.canImplement(ext) then
-        call IMPL^clazz.setImplemented(ext);
+        -- Vérifie qu'on n'implémente qu'une seule interface.
+        if IMPL^clazz.getImplemented() = nil then
+            call IMPL^clazz.setImplemented(ext);
+        else
+            error(err_max_impl_one, IMPL^clazz.getName());
+        end
     else
         -- Une specification du message d'erreur en fonction du type de class (interface
         -- ou classe concrete)
         if IMPL^clazz.isInterfaze() then
             error(err_interface_cannot_implement_class, IMPL^clazz.getName(), ext.getName());
-        else
-            error(err_class_cannot_implement_interface, IMPL^clazz.getName(), ext.getName());
         end
     end
 end
@@ -538,7 +530,8 @@ end
 -- conditionnelle
 INST -> si paro E parf BLOC SIX ;
 
-SIX ->;
+SIX -> ;
+SIX -> sinon BLOC ;
 -- return
 INST ->  retour E pv ;
 

@@ -23,7 +23,7 @@ inh lclazz : Clazz for Q;
 inh lname : STRING for Q;
 
 -- La signature des methodes
-inh signature : Method for PARFS, PARFSX, PARF;
+inh signature : Signature for PARFS, PARFSX, PARF;
 
 inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS, SIX, E, AFFX, ER, ERX, ES, ESX, T, TX, F, Q;
 -- les terminaux 
@@ -262,7 +262,7 @@ end
 DEF ->  TYPE ident #checkname paro #down PARFS parf #check #downbody MCORPS ;
 
 global
-    signature : Method;
+    signature : Signature;
     valid : BOOLEAN;
     tds : TDS;
     
@@ -281,7 +281,7 @@ end
 -- Passe l'objet de signature a PARFS
 #down{
 do
-    signature := new Method(ident^txt, TYPE^type);
+    signature := new Signature(ident^txt, TYPE^type);
     tds := new TDS();
     PARFS^tds := tds;
     PARFS^signature := signature;
@@ -291,10 +291,9 @@ end
 -- Verifie la validite de la signature
 #check{
 do
-    -- addableMethod à revoir :/
     valid := DEF^clazz.addableMethod(signature);
     if valid then
-        call DEF^clazz.addMethod(signature);
+        call DEF^clazz.addMethod(ident^txt, signature);
     else
         write("lul\n");
         -- Envoi d'un message d'erreur
@@ -317,7 +316,7 @@ end
 DEF ->  void ident #checkname paro #down PARFS parf #check #downbody MCORPS ;
 
 global
-    signature : Method;
+    signature : Signature;
     valid : BOOLEAN;
     tds : TDS;
     
@@ -336,7 +335,7 @@ end
 -- Passe l'objet de signature ainsi qu'une tds a PARFS
 #down{
 do
-    signature := new Method(ident^txt, new DTYPE("Void", 0));
+    signature := new Signature(ident^txt, new DTYPE("Void", 0));
     tds := new TDS();
     PARFS^tds := tds;
     PARFS^signature := signature;
@@ -348,7 +347,7 @@ end
 do
     valid := DEF^clazz.addableMethod(signature);
     if valid then
-        call DEF^clazz.addMethod(signature);
+        call DEF^clazz.addMethod(ident^txt, signature);
     else
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
@@ -397,7 +396,7 @@ end
 DEF -> ident #checkname paro #down PARFS #check parf #downbody BLOC ;
 
 global
-    signature : Method;
+    signature : Signature;
     valid : BOOLEAN;
     tds : TDS;
 
@@ -420,7 +419,7 @@ end
 -- Passe l'objet de signature ainsi qu'une tds a PARFS
 #down{
 do
-    signature := new Method(ident^txt, new Pointer(DEF^clazz));
+    signature := new Signature(ident^txt, new Pointer(DEF^clazz));
     tds := new TDS();
     PARFS^tds := tds;
     PARFS^signature := signature;
@@ -432,7 +431,7 @@ end
 do
     valid := DEF^clazz.addableConstructor(signature);
     if valid then
-        call DEF^clazz.addConstructor(signature);
+        call DEF^clazz.addConstructor(ident^txt, signature);
     else
         error(err_constructor, DEF^clazz.getName());
     end
@@ -552,7 +551,12 @@ end
 }
 
 -- conditionnelle
-INST -> si paro E parf BLOC SIX ;
+INST -> si paro #tds E parf BLOC SIX ;
+#tds {
+do
+    E^tds := INST^tds;
+end
+}
 
 SIX -> ;
 
@@ -778,8 +782,12 @@ do
 end
 }
 
-F ->  paro E parf #up ;
-
+F ->  paro #tds E parf #up ;
+#tds {
+do
+    E^tds := F^tds;
+end
+}
 -- Remonte les attributs :
 --  * type
 #up{
@@ -881,7 +889,7 @@ local
     clazz : Clazz;
     methodList : MethodList;
 do
-    methodList := Q^lclazz.getMethods(Q^lname);
+--    methodList := Q^lclazz.getMethods(Q^lname);
     
 end
 }
@@ -894,9 +902,20 @@ do
 end
 }
 
-ARGS ->  E ARGSX  ;
+ARGS -> #tds E ARGSX  ;
+#tds {
+do
+-- TODO: mettre la bonne tds.
+E^tds := new TDS();
+end
+}
 ARGS -> ;
-ARGSX ->   virg E ARGSX  ;
+ARGSX ->   virg #tds E ARGSX  ;
+#tds {
+do
+    E^tds := new TDS();
+end
+}
 ARGSX -> ;
 
 end

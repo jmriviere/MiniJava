@@ -23,9 +23,9 @@ public class Clazz extends DTYPE {
 	private HashMap<String, DTYPE> attributes;
 
 	// Contient la liste des méthodes définies
-	private ArrayList<Method> methods;
+	private HashMap<String, MethodList> methods;
 	
-	private ArrayList<Method> constructors;
+	private HashMap<String, MethodList> constructors;
 
 	// Spécifie respectivement la classe implémentée et l'interface étendue.
 	private Clazz implemented, extended;
@@ -34,8 +34,8 @@ public class Clazz extends DTYPE {
 		super(name, 0);
 		this.interfaze = interfaze;
 		attributes = new HashMap<String, DTYPE>();
-		methods = new ArrayList<Method>();
-		constructors = new ArrayList<Method>();
+		methods = new HashMap<String, MethodList>();
+		constructors = new HashMap<String, MethodList>();
 	}
 	
 	public boolean isInterfaze() {
@@ -55,12 +55,28 @@ public class Clazz extends DTYPE {
 		taille += type.getTaille();
 	}
 	
-	public void addMethod(Method m) {
-		methods.add(m);
+	public void addMethod(String name, Signature s) {
+		if (methods.containsKey(name)) {
+			MethodList ml = methods.get(name);
+			ml.addSignature(s);
+		}
+		else {
+			MethodList ml = new MethodList();
+			ml.addSignature(s);
+			methods.put(name, ml);
+		}
 	}
 	
-	public void addConstructor(Method m) {
-		constructors.add(m);
+	public void addConstructor(String name, Signature s) {
+		if (constructors.containsKey(name)) {
+			MethodList ml = constructors.get(name);
+			ml.addSignature(s);
+		}
+		else {
+			MethodList ml = new MethodList();
+			ml.addSignature(s);
+			constructors.put(name, ml);
+		}
 	}
 
 	public void setImplemented(Clazz other) {
@@ -88,20 +104,37 @@ public class Clazz extends DTYPE {
 		return (!interfaze && other.interfaze);
 	}
 	
-	public boolean addableMethod(Method m) {
+	public boolean addableMethod(Signature s) {
 		boolean valid = true;
+		/*
 		for (Method m_list : methods) {
 			if (m.equals(m_list)) {
 				valid = false;
 			}
+		}*/
+		if (methods.containsKey(s.getName())) {
+			ArrayList<Signature> signatures = ((MethodList)methods.get(s.getName())).getSignatureList();
+			for(Signature si : signatures) {
+				if (si.equals(s)) {
+					valid = false;
+				}
+			}
+			
 		}
 		return valid;
 	}
 	
-	public boolean addableConstructor(Method m) {
+	public boolean addableConstructor(Signature s) {
 		boolean valid = true;
+		/*
 		for (Method m_list : constructors) {
 			if (m.equals(m_list)) {
+				valid = false;
+			}
+		}*/
+		ArrayList<Signature> signatures = ((MethodList)constructors.get(s.getName())).getSignatureList();
+		for(Signature si : signatures) {
+			if (si.equals(s)) {
 				valid = false;
 			}
 		}
@@ -112,7 +145,7 @@ public class Clazz extends DTYPE {
 	 * toutes les méthodes de l'interface.
 	 * précondition: La classe doit implémenter une interface.
 	 */
-	public boolean checkImplements(Clazz implemented) {
+/*	public boolean checkImplements(Clazz implemented) {
 		boolean valid = true;
 		
 		if (implemented == null) {
@@ -145,6 +178,6 @@ public class Clazz extends DTYPE {
 			}
 		}
 		return valid;
-	}
+	}*/
 	
 }

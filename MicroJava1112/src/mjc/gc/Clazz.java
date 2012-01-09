@@ -106,17 +106,12 @@ public class Clazz extends DTYPE {
 	
 	public boolean addableMethod(Signature s) {
 		boolean valid = true;
-		/*
-		for (Method m_list : methods) {
-			if (m.equals(m_list)) {
-				valid = false;
-			}
-		}*/
 		if (methods.containsKey(s.getName())) {
 			ArrayList<Signature> signatures = ((MethodList)methods.get(s.getName())).getSignatureList();
 			for(Signature si : signatures) {
 				if (si.equals(s)) {
 					valid = false;
+					break;
 				}
 			}
 			
@@ -126,16 +121,17 @@ public class Clazz extends DTYPE {
 	
 	public boolean addableConstructor(Signature s) {
 		boolean valid = true;
-		/*
-		for (Method m_list : constructors) {
-			if (m.equals(m_list)) {
-				valid = false;
-			}
-		}*/
-		ArrayList<Signature> signatures = ((MethodList)constructors.get(s.getName())).getSignatureList();
-		for(Signature si : signatures) {
-			if (si.equals(s)) {
-				valid = false;
+		if (constructors.containsKey(s.getName())) {
+			// Accès à la liste des constructeurs.
+			MethodList constList = constructors.get(s.getName());
+			// La liste des signatures correspodant au constructeur
+			
+			ArrayList<Signature> signatures = constList.getSignatureList();
+			for(Signature si : signatures) {
+				if (si.equals(s)) {
+					valid = false;
+					break;
+				}
 			}
 		}
 		return valid;

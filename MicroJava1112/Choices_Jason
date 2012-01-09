@@ -1,0 +1,9 @@
+Vérification des types
+
+On a decidé qu'il était impossible de faire la somme ou le produit de boolean.
+Ce qui est le cas en java mais pas dans tous les langages
+Par exemple : true + false donnera une erreure est non pas true.
+              true * false donnera une erreure est non pas false.
+
+L'addition, la soustraction, la multiplication les modulos ... ne sont possible qu'entre Entier.
+Le et, le ou , la negation ... ne sont possible qu'entre Boolean.

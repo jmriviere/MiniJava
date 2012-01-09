@@ -55,7 +55,7 @@ public class Method {
     		params = false;
     	}
     	// Vérification de la concordance des types de retour
-    	returnType = this.returnType.getName().equals(((Method)other).returnType.getName());
+    	returnType = this.returnType.compareTo(((Method)other).returnType);
     	
     	// Vérification de la concordance des noms
     	name = (this.name.equals(((Method)other).name));

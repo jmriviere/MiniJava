@@ -1,10 +1,21 @@
 package mjc.gc;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Collection;
 
-public class Clazz {
+
+/**
+ * Permet de définir la déclaration d'une classe.
+ * @author poupine
+ *
+ */
+
+public class Clazz extends DTYPE {
+	// Le nom de la classe définie.
+	private String name;
+	
 	// Vérifie si on est en présence d'un interface ou d'une classe
 	private boolean interfaze;
 
@@ -13,16 +24,21 @@ public class Clazz {
 
 	// Contient la liste des méthodes définies
 	private ArrayList<Method> methods;
+	
+	private ArrayList<Method> constructors;
 
+	// Spécifie respectivement la classe implémentée et l'interface étendue.
 	private Clazz implemented, extended;
 
-	public Clazz(boolean interfaze) {
+	public Clazz(String name, boolean interfaze) {
+		super(name, 0);
 		this.interfaze = interfaze;
 		attributes = new HashMap<String, DTYPE>();
 		methods = new ArrayList<Method>();
+		constructors = new ArrayList<Method>();
 	}
-
-	public boolean isInterface() {
+	
+	public boolean isInterfaze() {
 		return interfaze;
 	}
 
@@ -36,6 +52,15 @@ public class Clazz {
 
 	public void addAttribute(String name, DTYPE type) {
 		attributes.put(name, type);
+		taille += type.getTaille();
+	}
+	
+	public void addMethod(Method m) {
+		methods.add(m);
+	}
+	
+	public void addConstructor(Method m) {
+		constructors.add(m);
 	}
 
 	public void setImplemented(Clazz other) {
@@ -44,10 +69,10 @@ public class Clazz {
 
 	public void setExtended(Clazz other) {
 		extended = other;
+		taille += other.getTaille();
 	}
-
+	
 	public Clazz getImplemented() {
-
 		return implemented;
 	}
 
@@ -62,4 +87,29 @@ public class Clazz {
 	public boolean canImplement(Clazz other) {
 		return (!interfaze && other.interfaze);
 	}
+	
+	public boolean addableMethod(Method m) {
+		boolean valid = true;
+		Method m_list;
+		for (Iterator<Method> i = methods.iterator(); i.hasNext();) {
+			m_list = i.next();
+			if (m.equals(m_list)) {
+				valid = false;
+			}
+		}
+		return valid;
+	}
+	
+	public boolean addableConstructor(Method m) {
+		boolean valid = true;
+		Method m_list;
+		for (Iterator<Method> i = constructors.iterator(); i.hasNext();) {
+			m_list = i.next();
+			if (m.equals(m_list)) {
+				valid = false;
+			}
+		}
+		return valid;
+	}
+	
 }

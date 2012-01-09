@@ -13,16 +13,19 @@ inh tdd : TDD for ENTITES, DEFCLASSE, DEFINTERFACE, SUPER, ETEND, IMPL, CORPS, D
             ARGS, ARGSX, Q, SIX;
 
 -- la classe courante
-inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, MCORPS;
+inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, MCORPS, BLOC, INSTS, INST,
+            E, AFFX, ER, ERX, ES, ESX, T, TX, F, ARGS, ARGSX, Q, SIX;
 
 -- Le TYPAGE
 syn type : DTYPE for TYPE, AFFX, E, ER, ERX, ES, ESX, T, TX, F, Q;
 inh ltype : DTYPE for ERX, ESX, TX, Q;
+inh lclazz : Clazz for Q;
+inh lname : STRING for Q;
 
 -- La signature des methodes
 inh signature : Method for PARFS, PARFSX, PARF;
 
-inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS;
+inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS, SIX, E, AFFX, ER, ERX, ES, ESX, T, TX, F, Q;
 -- les terminaux 
 
 space separateur is  "[\r\n\t ]+";     
@@ -73,12 +76,12 @@ term ident is  "[_A-Za-z][_0-9A-Za-z]*";
 PROGRAMME -> #init ENTITES #gen;
 global
    machine : AbstractMachine;
-   t : ClassTable;
+   t : TDD;
 #init {
 local
 do
    machine := PROGRAMME^source.getMachine();
-   t := new ClassTable();
+   t := new TDD();
    ENTITES^tdd := t;
 end
 }
@@ -99,29 +102,17 @@ ENTITES -> DEFCLASSE ENTITES  ;
 ENTITES -> DEFINTERFACE ENTITES  ;
 
 -- definition d'une classe
-DEFCLASSE -> classe ident #check #down SUPER CORPS #tds;
+DEFCLASSE -> classe ident #down SUPER #tds CORPS;
 
 -- La classe.
 global
     clazz : Clazz;
     info : BOOLEAN;
 
--- Verifie la validite de l'identifiant en tant que nom de classe
-#check{
-do
-    info := DEFCLASSE^tdd.containsKey(ident^txt);
-    if info then
-        error(err_class_exists, ident^txt);
-    else
-        -- Rien a faire.
-    end    
-end
-}
-
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
 do
-    clazz := new Clazz(false);
+    clazz := new Clazz(ident^txt, false);
     SUPER^clazz := clazz;
     CORPS^clazz := clazz;
 end
@@ -130,9 +121,12 @@ end
 -- Ajoute la classe dans la table des classes. Verifie au passage qu'elle n'existe pas encore.
 #tds {
 do
+    -- Vérifie que l'identifiant de la classe n'existe pas déjà.
+    info := DEFCLASSE^tdd.containsKey(ident^txt);
     if info then
         error(err_class_exists, ident^txt);
     else
+        -- Ajout à la table des déclarations.
         call DEFCLASSE^tdd.put(ident^txt, clazz);
     end
 end
@@ -141,29 +135,17 @@ end
 --DEFCLASSE -> classe ident etend ident CORPS ;
 --DEFCLASSE -> classe ident implemente ident CORPS ;
 --DEFCLASSE -> classe ident etend ident implemente ident CORPS ;
-DEFINTERFACE -> interface ident #check #down SUPER CORPS #tds;
+DEFINTERFACE -> interface ident #down SUPER #tds CORPS;
 
 -- La classe.
 global
     clazz : Clazz;
     info : BOOLEAN;
 
--- Verifie la validite de l'identifiant en tant que nom de classe
-#check{
-do
-    info := DEFINTERFACE^tdd.containsKey(ident^txt);
-    if info then
-        error(err_class_exists, ident^txt);
-    else
-        -- Rien a faire.
-    end    
-end
-}
-
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
 do
-    clazz := new Clazz(false);
+    clazz := new Clazz(ident^txt, true);
     SUPER^clazz := clazz;
     CORPS^clazz := clazz;
 end
@@ -172,9 +154,12 @@ end
 -- Ajoute la classe dans la table des classes. Verifie au passage qu'elle n'existe pas encore.
 #tds {
 do
+    -- Vérifie que l'identifiant de l'interface n'existe pas déjà.
+    info := DEFINTERFACE^tdd.containsKey(ident^txt);
     if info then
         -- Ne fait rien puisque la declaration de la classe est invalide
     else
+        -- Ajout à la table de déclarations.
         call DEFINTERFACE^tdd.put(ident^txt, clazz);
     end
 end
@@ -194,15 +179,25 @@ local
     ext : Clazz;
 do
     ext := ETEND^tdd.get(ident^txt);
-    if ETEND^clazz.canExtend(ext) then
-        call ETEND^clazz.setExtended(ext);
+    -- Vérifie qu'on peut hériter de l'identifiant spécifié.
+    if (ext /= nil & ETEND^clazz.canExtend(ext)) then
+        -- Vérifie qu'on n'hérite que d'une seule classe.
+        if ETEND^clazz.getExtended() = nil then
+            call ETEND^clazz.setExtended(ext);
+        else
+            error(err_max_ext_one, ETEND^clazz.getName());
+        end
     else
         -- Une specification du message d'erreur en fonction du type de class (interface
         -- ou classe concrete)
         if ETEND^clazz.isInterfaze() then
-            error(err_interface_cannot_extend_class, ETEND^clazz.getName(), ext.getName());
+            error(err_interface_cannot_extend_class, ETEND^clazz.getName(), ident^txt);
         else
-            error(err_class_cannot_extend_interface, ETEND^clazz.getName(), ext.getName());
+            if ext = nil then
+                error(err_unknown_class, ident^txt);
+            else
+                error(err_class_cannot_extend_interface, ETEND^clazz, ident^txt);
+            end
         end
     end
 end
@@ -215,18 +210,28 @@ IMPL -> implemente ident #up ;
 -- Verifie la validite de l'implements et l'enregistre dans la classe
 #up{
 local
-    ext : Clazz;
+    impl : Clazz;
 do
-    ext := IMPL^tdd.get(ident^txt);
-    if IMPL^clazz.canImplement(ext) then
-        call IMPL^clazz.setImplemented(ext);
+    impl := IMPL^tdd.get(ident^txt);
+    -- Vérifie qu'on peut implémenter l'identifiant spécifié.
+    if (impl /= nil & IMPL^clazz.canImplement(impl)) then
+        -- Vérifie qu'on n'implémente qu'une seule interface.
+        if IMPL^clazz.getImplemented() = nil then
+            call IMPL^clazz.setImplemented(impl);
+        else
+            error(err_max_impl_one, IMPL^clazz.getName());
+        end
     else
         -- Une specification du message d'erreur en fonction du type de class (interface
         -- ou classe concrete)
         if IMPL^clazz.isInterfaze() then
-            error(err_interface_cannot_implement_class, IMPL^clazz.getName(), ext.getName());
+            error(err_interface_cannot_implement_class, IMPL^clazz.getName(), ident^txt);
         else
-            error(err_class_cannot_implement_interface, IMPL^clazz.getName(), ext.getName());
+            if impl = nil then
+                error(err_unknown_interface, ident^txt);
+            else
+                error(err_interface_cannot_implement_class, IMPL^clazz, ident^txt);
+            end
         end
     end
 end
@@ -262,10 +267,13 @@ global
     tds : TDS;
     
 -- Verifie la bonne denomination de la methode
-#checkname{
+#checkname {
+local
+    ClassName : String;
 do
-    if DEF^clazz.getName() = ident^txt then
-        -- TODO: genere une erreur WRONG NAME (METHOD)
+    ClassName := DEF^clazz.getName();
+    if ClassName.equals(ident^txt) then
+        error(err_meth_name, DEF^clazz.getName());
     end
 end
 }
@@ -283,15 +291,17 @@ end
 -- Verifie la validite de la signature
 #check{
 do
+    -- addableMethod à revoir :/
     valid := DEF^clazz.addableMethod(signature);
     if valid then
-        -- Rien a faire
+        call DEF^clazz.addMethod(signature);
     else
+        write("lul\n");
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
         -- #Mauvais type de retour
         -- #Signature deja existante a l'identique
-        error(err_wrong_signature, signature);
+--        error(err_wrong_signature, signature);
     end
 end
 }
@@ -313,9 +323,12 @@ global
     
 -- Verifie la bonne denomination de la methode
 #checkname{
+local
+    ClassName : String;
 do
-    if DEF^clazz.getName() = ident^txt then
-        -- TODO: genere une erreur WRONG NAME (METHOD)
+    ClassName := DEF^clazz.getName();
+    if ClassName.equals(ident^txt) then
+        error(err_meth_name, DEF^clazz.getName());
     end
 end
 }
@@ -323,7 +336,7 @@ end
 -- Passe l'objet de signature ainsi qu'une tds a PARFS
 #down{
 do
-    signature := new Method(ident^txt, nil);
+    signature := new Method(ident^txt, new DTYPE("Void", 0));
     tds := new TDS();
     PARFS^tds := tds;
     PARFS^signature := signature;
@@ -335,13 +348,13 @@ end
 do
     valid := DEF^clazz.addableMethod(signature);
     if valid then
-        -- Rien a faire
+        call DEF^clazz.addMethod(signature);
     else
         -- Envoi d'un message d'erreur
         -- TODO: Specifier un peu l'erreur.
         -- #Mauvais type de retour
         -- #Signature deja existante a l'identique
-        error(err_wrong_signature, signature);
+ --       error(err_wrong_signature, signature);
     end
 end
 }
@@ -362,7 +375,7 @@ do
     if MCORPS^clazz.isInterfaze() then
         -- Rien a faire
     else
-        -- TODO: Ecrire le message d'erreur
+        error(err_meth_not_specified, MCORPS^clazz.getName());
     end
 end
 }
@@ -373,7 +386,9 @@ MCORPS -> #check BLOC ;
 #check{
 do
     if MCORPS^clazz.isInterfaze() then
-        -- TODO: Ecrire le message d'erreur
+        error(err_meth_body_in_interface, MCORPS^clazz.getName());
+    else
+        -- Rien à faire
     end
 end
 }
@@ -388,12 +403,16 @@ global
 
 -- Verifie qu'on est dans une classe concrete ainsi que la bonne denomination du constructeur.
 #checkname{
+local
+    ClassName : String;
 do
     if DEF^clazz.isInterfaze() then
-        -- TODO: Ecrire le message d'erreur
-    end
-    if DEF^clazz.getName() /= ident^txt then
-        -- TODO: Ecrire le message d'erreur. WRONG NAME (CONSTRUCTOR)
+        error(err_interface_constructor, DEF^clazz.getName());
+    else
+        ClassName := DEF^clazz.getName();
+        if ~ClassName.equals(ident^txt) then
+            error(err_constructor_name, ident^txt);
+        end
     end
 end
 }
@@ -413,12 +432,9 @@ end
 do
     valid := DEF^clazz.addableConstructor(signature);
     if valid then
-        -- Rien a faire
+        call DEF^clazz.addConstructor(signature);
     else
-        -- Envoi d'un message d'erreur
-        -- TODO: Specifier un peu l'erreur.
-        -- #Signature deja existante a l'identique
-        error(err_wrong_signature, signature);
+        error(err_constructor, DEF^clazz.getName());
     end
 end
 }
@@ -454,14 +470,13 @@ TYPE-> ident #type ;
 -- Set le type de TYPE
 #type{
 local
-    clazz : DTYPE;
+    clazz : Clazz;
 do
-    clazz := TYPE^tdd.getClazz(ident^txt);
+    clazz := TYPE^tdd.get(ident^txt);
     if clazz /= nil then
-        -- TODO : Creer une class Pointer
         TYPE^type := new Pointer(clazz);
     else
-        -- TODO: generer une erreur
+        error(err_unknown_class, ident^txt);
     end
 end
 }
@@ -476,8 +491,9 @@ PARF ->  TYPE ident #sign ;
 -- Ajoute l'element dans la tds et dans la signature
 #sign{
 do
+    -- TODO: Vérifier que l'argument n'existe pas déjà dans la tds.
     call PARF^signature.addArgument(TYPE^type);
-    call PARF^tds.add(ident^txt, new INFO(TYPE^type));
+    call PARF^tds.inserer(ident^txt, new INFO(TYPE^type));
 end
 }
 
@@ -514,8 +530,8 @@ end
 -- Teste la compatibilite des types et affecte ident dans la tds.
 #checktype{
 do
-    if AFFX^type.isType(TYPE^type) then
-        call INST^tds.inserer(ident^txt, new INFO(TYPE^type, AFFX^type));
+    if AFFX^type.compareTo(TYPE^type) then
+        call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
     else
         -- TODO: genere un message d'erreur
     end
@@ -538,7 +554,10 @@ end
 -- conditionnelle
 INST -> si paro E parf BLOC SIX ;
 
-SIX ->;
+SIX -> ;
+
+SIX -> sinon BLOC ;
+
 -- return
 INST ->  retour E pv ;
 
@@ -770,7 +789,7 @@ end
 }
 
 -- new
-F -> nouveau TYPE #checktype paro ARGS parf #checkconstructor #up ;
+F -> nouveau TYPE paro ARGS parf #up ;
 
 -- Remonte les attributs :
 --  * type
@@ -787,8 +806,14 @@ F ->  ident #down Q #up ;
 local
     info : INFO;
 do
-    info := Q^tds.chercherGlobalement(ident^txt);
-    Q^ltype := info.getType();
+   info := F^tds.chercherGlobalement(ident^txt);
+    if info = nil then
+        Q^ltype := nil;
+    else
+        Q^ltype := info.getType();
+    end
+    Q^lclazz := F^clazz;
+    Q^lname := ident^txt;
 end
 }
 
@@ -807,19 +832,68 @@ Q -> #up ;
 --  * type
 #up{
 do
-    Q^type := Q^ltype;
+    if Q^ltype = nil then
+        Q^type := Q^lclazz.getAttribute(Q^lname);
+    else
+        Q^type := Q^ltype;
+    end
 end
 }
 
 -- acces attribut
-Q ->  pt ident  Q ;
+Q ->  pt ident #down Q #up ;
+
+-- Passe le type de gauche a Q
+#down{
+local
+    info : INFO;
+do
+    info := Q^tds.chercherGlobalement(ident^txt);
+    if info /=nil then
+        Q1^ltype := info.getType();
+    else
+        Q1^ltype := nil;
+    end
+    match Q^ltype
+        with Pointer then
+            Q1^lclazz := Q^ltype.getClazz();
+        else
+            -- TODO: Genere un erreur
+    end
+    Q1^lname := ident^txt;
+end
+}
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+   Q^type := Q1^type;
+end
+}
 
 -- arguments d'appel de methode
-Q ->  paro ARGS parf Q ;
+Q ->  paro ARGS parf #down Q #up ;
 
--- Pourquoi est-ce en double ? Erreur de ma part ?
--- -- arguments d'appel de methode
--- Q ->  paro ARGS parf Q ;
+-- Passe le type de gauche a Q
+#down{
+local
+    clazz : Clazz;
+    methodList : MethodList;
+do
+    methodList := Q^lclazz.getMethods(Q^lname);
+    
+end
+}
+
+-- Remonte les attributs :
+--  * type
+#up{
+do
+   Q^type := Q1^type;
+end
+}
+
 ARGS ->  E ARGSX  ;
 ARGS -> ;
 ARGSX ->   virg E ARGSX  ;

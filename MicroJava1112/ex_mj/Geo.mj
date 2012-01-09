@@ -12,7 +12,7 @@ class Point {
   int getx() {
     return x;
     }
-    
+
   int gety() {
     return y;
     }
@@ -46,7 +46,7 @@ class Point {
   }
 
 
-class PointCol extends Point {
+class PointCol extends Point{
   int col;
 
   PointCol (int xi,int yi, int ci) {

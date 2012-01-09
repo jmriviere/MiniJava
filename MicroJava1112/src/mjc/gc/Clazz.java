@@ -90,9 +90,7 @@ public class Clazz extends DTYPE {
 	
 	public boolean addableMethod(Method m) {
 		boolean valid = true;
-		Method m_list;
-		for (Iterator<Method> i = methods.iterator(); i.hasNext();) {
-			m_list = i.next();
+		for (Method m_list : methods) {
 			if (m.equals(m_list)) {
 				valid = false;
 			}
@@ -102,10 +100,47 @@ public class Clazz extends DTYPE {
 	
 	public boolean addableConstructor(Method m) {
 		boolean valid = true;
-		Method m_list;
-		for (Iterator<Method> i = constructors.iterator(); i.hasNext();) {
-			m_list = i.next();
+		for (Method m_list : constructors) {
 			if (m.equals(m_list)) {
+				valid = false;
+			}
+		}
+		return valid;
+	}
+	
+	/* Vérifie, dans le cas d'une implémentation, qu'on définit bien 
+	 * toutes les méthodes de l'interface.
+	 * précondition: La classe doit implémenter une interface.
+	 */
+	public boolean checkImplements(Clazz implemented) {
+		boolean valid = true;
+		
+		if (implemented == null) {
+			return true;
+		}
+		
+		ArrayList<Method> interface_list = (ArrayList<Method>)implemented.methods.clone();
+		ArrayList<Method> self_list = (ArrayList<Method>)methods.clone();
+		
+		if (extended != null) {
+			self_list.addAll(extended.methods);
+		}
+		
+		for (Method mOther : interface_list) {
+				for (Method mSelf : self_list) {
+					if (mOther.equals(mSelf)) {
+						interface_list.remove(mOther);
+						self_list.remove(mSelf);
+						continue;
+					}
+				}
+		}
+		
+		if (!interface_list.isEmpty()) {
+			if (extended != null && extended.extended != null) {
+				extended.checkImplements(implemented);
+			}
+			else {
 				valid = false;
 			}
 		}

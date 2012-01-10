@@ -26,5 +26,15 @@ public class DTYPE {
 	public String toString() {
 		return nom + "(" + taille + ")";
 	}
+
+
+	public boolean isType(DTYPE dtype) {
+		if (nom.equals("Null")) {
+			if (dtype instanceof Pointer) {
+				return true;
+			}
+		}
+		return compareTo(dtype);
+	}
 }
 

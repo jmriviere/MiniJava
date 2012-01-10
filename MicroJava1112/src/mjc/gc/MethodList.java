@@ -2,52 +2,163 @@ package mjc.gc;
 
 import java.util.ArrayList;
 
-public class MethodList {
+/**
+ * A set of signatures that matches a given name and return type
+ * 
+ * @author (comments) emmanuel
+ */
+public class MethodList implements Cloneable {
+	// Nom de la methode regroupee
+	private String name;
+
+	// Type de retour de la methode regroupee
+	private DTYPE returnType;
+	
     // Liste des types de paramètres 
     private ArrayList<Signature> signatures;
 
-    public MethodList() {
-    	signatures = new ArrayList<Signature>();
+    /**
+     * Creates a MethodList
+     * 
+     * @param name the name of the method
+     * @param returnType the returnType of the method
+     */
+    public MethodList(String name, DTYPE returnType) {
+    	this.name = name;
+    	this.returnType = returnType;
+    	signatures = new ArrayList<>();
     }
     
-    public void addSignature(Signature s) {
-    	signatures.add(s);
+	/**
+	 * @return the common name for these methods
+	 */
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * @return the common return type of these methods
+	 */
+	public DTYPE getReturnType() {
+		return returnType;
+	}
+	
+    /**
+     * @param s the signature to add
+     * @return false if the signature wasn't added
+     * </br>That normally happens only when the signature is already there
+     */
+    public boolean addSignature(Signature s) {
+    	if (signatures.contains(s)) {
+			return false;
+		}
+    	return signatures.add(s);
     }
     
+    /**
+     * @return returns all the signatures in this MethodList
+     */
     public ArrayList<Signature> getSignatureList() {
     	return signatures;
     }
+    
+    /**
+     * Test a signature for a call to this method
+     * 
+     * @param signature the signature to test
+     * @return true if this signature is accepted by one of the definitions of this method
+     */
+    public boolean doAccept(Signature signature) {
+    	for (Signature sign : signatures) {
+			if (sign.size()==signature.size()) {
+				boolean ok = true;
+				for (int i = 0; i < signature.size(); i++) {
+					if (!signature.get(i).isType(sign.get(i))) {
+						ok = false;
+						continue;
+					}
+				}
+				if (ok) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-    @Override
-    public boolean equals(Object other) {
-    	return true;
- /*   	// Les méthodes ont-elles la même liste de paramètres, le même type de retour et le même nom?
-    	boolean params = true;
-    	boolean returnType = true;
-    	boolean name = true;
+    /**
+     * @param signatureList the list of signatures to remove from that one
+     */
+    public void removeSignatures(ArrayList<Signature> signatureList) {
+		signatures.removeAll(signatureList);
+	}
 
-    	
-    	Iterator<DTYPE> selfI = this.params.iterator();
-    	Iterator<DTYPE> otherI = ((Method)other).params.iterator();
-    	// Vérification de la concordance du type de chaque paramètre
-    	if (this.params.size() == ((Method)other).params.size()) {
-    		while (selfI.hasNext() && otherI.hasNext()) {
-    			String selfName = ((DTYPE)selfI.next()).getName();
-    			String otherName = ((DTYPE)otherI.next()).getName();
-    			if (!selfName.equals(otherName)) {
-    				params = false;
-    			}
-    		}
-    	}
-    	else {
-    		params = false;
-    	}
-    	// Vérification de la concordance des types de retour
-    	returnType = this.returnType.compareTo(((Method)other).returnType);
-    	
-    	// Vérification de la concordance des noms
-    	name = (this.name.equals(((Method)other).name));
-    	
-    	return (params && returnType && name);*/
-    }
+	/**
+	 * @return true si la list ne possede plus de signature
+	 */
+	public boolean isEmpty() {
+		return signatures.isEmpty();
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	protected Object clone() {
+		MethodList clone = new MethodList(name, returnType);
+		clone.signatures = (ArrayList<Signature>) signatures.clone();
+		return clone;
+	}
+
+	/**
+	 * Merges a MethodList in this one
+	 * 
+	 * @param methodList the method list to merge into this one
+	 */
+	public void merge(MethodList methodList) {
+		for (Signature signature : methodList.signatures) {
+			if (!signatures.contains(signature)) {
+				signatures.add(signature);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((returnType == null) ? 0 : returnType.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MethodList other = (MethodList) obj;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (returnType == null) {
+			if (other.returnType != null)
+				return false;
+		} else if (!returnType.equals(other.returnType))
+			return false;
+		return true;
+	}
 }

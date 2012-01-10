@@ -2,7 +2,11 @@ package mjc.gc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+<<<<<<< HEAD
 import java.util.Collection;
+=======
+import java.util.Set;
+>>>>>>> 046edc1b2551b5cd74b90ecf7940068b71db082f
 
 
 /**
@@ -297,6 +301,7 @@ public class Clazz extends DTYPE {
 		return emptyList;
 	}
 	
+<<<<<<< HEAD
 	/**
 	 * @return the concretes methods for this class
 	 */
@@ -367,6 +372,47 @@ public class Clazz extends DTYPE {
 			inherit |= extended.isClazz(other);
 		}
 		return inherit;
+=======
+	public boolean hasMethod(Signature s) {
+		boolean returnValue = false;
+		if (methods.get(s.getName()) != null) {
+			ArrayList<Signature> mlist = methods.get(s.getName()).getSignatureList();
+			if (mlist != null) {
+				for (Signature si : mlist) {
+					if (si.equals(s)) {
+						returnValue = true;
+					}
+				}
+			}
+		}
+		if (extended != null && !returnValue) {
+			returnValue = extended.hasMethod(s);
+		}
+		return returnValue;
+	}
+	
+	/* Vérifie, dans le cas d'une implémentation, qu'on définit bien 
+	 * toutes les méthodes de l'interface.
+	 */
+	public boolean checkImplements() {
+		boolean valid = true;
+		
+		if (implemented == null) {
+			valid = true;
+		}
+		else {
+			Set<String> MethodList = implemented.methods.keySet();
+			for (String selfKey : MethodList) {
+				ArrayList<Signature> SignatureList = implemented.methods.get(selfKey).getSignatureList();
+				for (Signature s : SignatureList) {
+					if (!this.hasMethod(s)) {
+						valid = false;
+					}
+				}
+			}
+		}
+		return valid;
+>>>>>>> 046edc1b2551b5cd74b90ecf7940068b71db082f
 	}
 	
 }

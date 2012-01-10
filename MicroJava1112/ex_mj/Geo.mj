@@ -1,4 +1,8 @@
-class Point {
+interface Test {
+int getx();
+int lol();
+}
+class Point implements Test {
   int x;
   int y;
   Point origine;

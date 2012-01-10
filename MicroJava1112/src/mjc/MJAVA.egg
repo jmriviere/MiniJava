@@ -102,7 +102,7 @@ ENTITES -> DEFCLASSE ENTITES  ;
 ENTITES -> DEFINTERFACE ENTITES  ;
 
 -- definition d'une classe
-DEFCLASSE -> classe ident #down SUPER #tds CORPS;
+DEFCLASSE -> classe ident #down SUPER #tds CORPS #check_implements;
 
 -- La classe.
 global
@@ -128,6 +128,17 @@ do
     else
         -- Ajout à la table des déclarations.
         call DEFCLASSE^tdd.put(ident^txt, clazz);
+    end
+end
+}
+
+#check_implements {
+local
+    implemented : Clazz;
+do
+    implemented := clazz.getImplemented();
+    if ~clazz.checkImplements() then
+        error(err_implement, clazz.getName(), implemented.getName());
     end
 end
 }
@@ -295,12 +306,8 @@ do
     if valid then
         call DEF^clazz.addMethod(ident^txt, signature);
     else
-        write("lul\n");
         -- Envoi d'un message d'erreur
-        -- TODO: Specifier un peu l'erreur.
-        -- #Mauvais type de retour
-        -- #Signature deja existante a l'identique
---        error(err_wrong_signature, signature);
+        error(err_wrong_signature, signature);
     end
 end
 }
@@ -350,10 +357,7 @@ do
         call DEF^clazz.addMethod(ident^txt, signature);
     else
         -- Envoi d'un message d'erreur
-        -- TODO: Specifier un peu l'erreur.
-        -- #Mauvais type de retour
-        -- #Signature deja existante a l'identique
- --       error(err_wrong_signature, signature);
+        error(err_wrong_signature, ident^txt);
     end
 end
 }

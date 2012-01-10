@@ -2,8 +2,7 @@ package mjc.gc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Collection;
+import java.util.Set;
 
 
 /**
@@ -137,43 +136,45 @@ public class Clazz extends DTYPE {
 		return valid;
 	}
 	
+	public boolean hasMethod(Signature s) {
+		boolean returnValue = false;
+		if (methods.get(s.getName()) != null) {
+			ArrayList<Signature> mlist = methods.get(s.getName()).getSignatureList();
+			if (mlist != null) {
+				for (Signature si : mlist) {
+					if (si.equals(s)) {
+						returnValue = true;
+					}
+				}
+			}
+		}
+		if (extended != null && !returnValue) {
+			returnValue = extended.hasMethod(s);
+		}
+		return returnValue;
+	}
+	
 	/* Vérifie, dans le cas d'une implémentation, qu'on définit bien 
 	 * toutes les méthodes de l'interface.
-	 * précondition: La classe doit implémenter une interface.
 	 */
-/*	public boolean checkImplements(Clazz implemented) {
+	public boolean checkImplements() {
 		boolean valid = true;
 		
 		if (implemented == null) {
-			return true;
+			valid = true;
 		}
-		
-		ArrayList<Method> interface_list = (ArrayList<Method>)implemented.methods.clone();
-		ArrayList<Method> self_list = (ArrayList<Method>)methods.clone();
-		
-		if (extended != null) {
-			self_list.addAll(extended.methods);
-		}
-		
-		for (Method mOther : interface_list) {
-				for (Method mSelf : self_list) {
-					if (mOther.equals(mSelf)) {
-						interface_list.remove(mOther);
-						self_list.remove(mSelf);
-						continue;
+		else {
+			Set<String> MethodList = implemented.methods.keySet();
+			for (String selfKey : MethodList) {
+				ArrayList<Signature> SignatureList = implemented.methods.get(selfKey).getSignatureList();
+				for (Signature s : SignatureList) {
+					if (!this.hasMethod(s)) {
+						valid = false;
 					}
 				}
-		}
-		
-		if (!interface_list.isEmpty()) {
-			if (extended != null && extended.extended != null) {
-				extended.checkImplements(implemented);
-			}
-			else {
-				valid = false;
 			}
 		}
 		return valid;
-	}*/
+	}
 	
 }

@@ -11,7 +11,7 @@ import java.util.Collection;
  *
  */
 public class Clazz extends DTYPE {
-	private static final Collection<MethodList> emptyList = new ArrayList<>();
+	private static final Collection<MethodList> emptyList = new ArrayList<MethodList>();
 
 	// Le nom de la classe définie.
 	private String name;
@@ -39,8 +39,8 @@ public class Clazz extends DTYPE {
 	public Clazz(String name, boolean interfaze) {
 		super(name, 0);
 		this.interfaze = interfaze;
-		attributes = new HashMap<>();
-		methods = new HashMap<>();
+		attributes = new HashMap<String, DTYPE>();
+		methods = new HashMap<String, MethodList>();
 		constructors = new MethodList(name, null);
 	}
 	
@@ -60,7 +60,11 @@ public class Clazz extends DTYPE {
 	 * @return if the attribute is known in this class
 	 */
 	public boolean hasAttribute(String attrName) {
-		return attributes.containsKey(attrName)||extended.hasAttribute(attrName);
+		boolean ret = attributes.containsKey(attrName);
+		if (extended != null) {
+			ret |= extended.hasAttribute(attrName);
+		}
+		return ret;
 	}
 
 	/**
@@ -268,7 +272,7 @@ public class Clazz extends DTYPE {
 			return true;
 		}
 		Collection<MethodList> list = implemented.getToImplement();
-		return implement(new ArrayList<>(list));
+		return implement(new ArrayList<MethodList>(list));
 	}
 	
 	/**
@@ -277,7 +281,7 @@ public class Clazz extends DTYPE {
 	private Collection<MethodList> getToImplement() {
 		if (interfaze) {
 			Collection<MethodList> tempList = methods.values();
-			ArrayList<MethodList> list = new ArrayList<>();
+			ArrayList<MethodList> list = new ArrayList<MethodList>();
 			
 			for (MethodList methodList : tempList) {
 				list.add((MethodList) methodList.clone());
@@ -302,7 +306,7 @@ public class Clazz extends DTYPE {
 	 */
 	private Collection<MethodList> getConcreteMethods() {
 		Collection<MethodList> tempList = methods.values();
-		ArrayList<MethodList> list = new ArrayList<>();
+		ArrayList<MethodList> list = new ArrayList<MethodList>();
 		
 		for (MethodList methodList : tempList) {
 			list.add((MethodList) methodList.clone());
@@ -367,6 +371,17 @@ public class Clazz extends DTYPE {
 			inherit |= extended.isClazz(other);
 		}
 		return inherit;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Clazz [interfaze=" + interfaze + ", extended=" + extended
+				+ ", implemented=" + implemented + ", attributes=" + attributes
+				+ "\n--- methods ---" + methods.values() + "\n--- constructors ---" + constructors
+				+ "]";
 	}
 	
 }

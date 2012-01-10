@@ -26,7 +26,7 @@ public class MethodList implements Cloneable {
     public MethodList(String name, DTYPE returnType) {
     	this.name = name;
     	this.returnType = returnType;
-    	signatures = new ArrayList<>();
+    	signatures = new ArrayList<Signature>();
     }
     
 	/**
@@ -160,5 +160,17 @@ public class MethodList implements Cloneable {
 		} else if (!returnType.equals(other.returnType))
 			return false;
 		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String ret = "\n";
+		for (Signature signature : signatures) {
+			ret += "+"+name+"("+signature+"):"+returnType;
+		}
+		return ret;
 	}
 }

@@ -587,7 +587,7 @@ end
 }
 
 -- conditionnelle
-INST -> si paro E parf #tds BLOC SIX ;
+INST -> si paro #tds E parf  BLOC SIX ;
 
 -- Genere une sous tds pour le bloc
 #tds{
@@ -616,10 +616,12 @@ E ->  ER AFFX #checktype #up ;
 -- Teste la compatibilite des types
 #checktype{
 do
+    if AFFX^type /= nil then
     if AFFX^type.isType(ER^type) then
         -- OK
     else
         -- TODO: genere un message d'erreur
+    end
     end
 end
 }
@@ -628,7 +630,11 @@ end
 --  * type
 #up{
 do
-    E^type := AFFX^type;
+    if AFFX^type = nil then
+        E^type := ER^type;
+    else
+        E^type := AFFX^type;
+    end
 end
 }
 
@@ -732,7 +738,7 @@ OPREL -> inf #up ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -741,7 +747,7 @@ OPREL -> infeg #up ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -750,7 +756,7 @@ OPREL -> sup #up ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -759,7 +765,7 @@ OPREL -> supeg #up ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -768,7 +774,7 @@ OPREL -> eg #up ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -777,7 +783,7 @@ OPREL -> neg #up ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -791,7 +797,7 @@ do
     if OPADD^domain.accepts(0, ESX^ltype) then
         call OPADD^domain.restrict(0,ESX^ltype);
         if OPADD^domain.accepts(1,T^type) then
-            call OPADD^domain.restrict(0,T^type);
+            call OPADD^domain.restrict(1,T^type);
         else
             -- ERROR
             -- TODO erreur dans le type de T
@@ -834,7 +840,7 @@ OPADD -> plus #up ;
 -- Remonte le domaine
 #up{
 do
-    OPADD^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPADD^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -843,7 +849,7 @@ OPADD -> moins #up ;
 -- Remonte le domaine
 #up{
 do
-    OPADD^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPADD^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -852,7 +858,7 @@ OPADD -> ou #up ;
 -- Remonte le domaine
 #up{
 do
-    OPADD^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Boolean",1));
+    OPADD^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Boolean",1), new DTYPE("Boolean",1));
 end
 }
 
@@ -926,7 +932,7 @@ OPMUL -> mult #up ;
 -- Remonte le domaine
 #up{
 do
-    OPMUL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPMUL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -935,7 +941,7 @@ OPMUL -> div #up ;
 -- Remonte le domaine
 #up{
 do
-    OPMUL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPMUL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -944,7 +950,7 @@ OPMUL -> mod #up ;
 -- Remonte le domaine
 #up{
 do
-    OPMUL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
+    OPMUL^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -953,7 +959,7 @@ OPMUL -> et #up ;
 -- Remonte le domaine
 #up{
 do
-    OPMUL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Boolean",1));
+    OPMUL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Boolean",1), new DTYPE("Boolean",1));
 end
 }
 
@@ -1018,7 +1024,7 @@ OPUN -> plus #up ;
 -- Remonte le domaine
 #up{
 do
-    OPUN^domain := new Domain(new DTYPE("Integer",1));
+    OPUN^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -1027,7 +1033,7 @@ OPUN -> moins #up ;
 -- Remonte le domaine
 #up{
 do
-    OPUN^domain := new Domain(new DTYPE("Integer",1));
+    OPUN^domain := new Domain(new DTYPE("Integer",1), new DTYPE("Integer",1));
 end
 }
 
@@ -1036,7 +1042,7 @@ OPUN -> non #up ;
 -- Remonte le domaine
 #up{
 do
-    OPUN^domain := new Domain(new DTYPE("Boolean",1));
+    OPUN^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Boolean",1));
 end
 }
 

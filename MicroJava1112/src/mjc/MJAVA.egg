@@ -13,7 +13,7 @@ inh tdd : TDD for ENTITES, DEFCLASSE, DEFINTERFACE, SUPER, ETEND, IMPL, CORPS, D
             ARGS, ARGSX, Q, SIX;
 
 -- la classe courante
-inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, MCORPS, BLOC, INSTS, INST,
+inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, PARFS, PARFSX, PARF, MCORPS, BLOC, INSTS, INST,
             E, AFFX, ER, ERX, ES, ESX, T, TX, F, ARGS, ARGSX, Q, SIX;
 
 -- Le TYPAGE
@@ -29,6 +29,12 @@ syn signature : Signature for PARFS, PARFSX, ARGS, ARGSX;
 syn domain : Domain for OPREL, OPADD, OPMUL, OPUN;
 
 inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS, SIX, E, AFFX, ER, ERX, ES, ESX, T, TX, F, Q, ARGS, ARGSX;
+
+-- Le retour des methodes
+inh returns : DTYPE for MCORPS, BLOC, INSTS, INST, SIX;
+inh hreturned : BOOLEAN for BLOC, INSTS, INST, SIX;
+syn sreturned : BOOLEAN for BLOC, INSTS, INST, SIX;
+
 -- les terminaux 
 
 space separateur is  "[\r\n\t ]+";     
@@ -105,7 +111,7 @@ ENTITES -> DEFCLASSE ENTITES  ;
 ENTITES -> DEFINTERFACE ENTITES  ;
 
 -- definition d'une classe
-DEFCLASSE -> classe ident #down #tdd SUPER CORPS;
+DEFCLASSE -> classe ident #down #tdd SUPER CORPS #check ;
 
 -- La classe.
 global
@@ -132,6 +138,29 @@ do
     else
         -- Ajout à la table des déclarations.
         call DEFCLASSE^tdd.put(ident^txt, clazz);
+    end
+end
+}
+
+-- Verifie qu'on implemente bien l'interface
+-- Ajoute (si necessaire) le constructeur par defaut.
+#check{
+local
+    impl : Clazz;
+    method : MethodList;
+    signature : Signature;
+do
+    if clazz.checkImplements() then
+    else
+        impl := clazz.getImplemented();
+        error(err_implement, clazz.getName(), impl.getName());
+    end
+    method := clazz.getConstructors();
+    signature := new Signature();
+    if method.doAccept(signature) then
+        -- Le constructeur par defaut a ete redefini
+    else
+        call clazz.addConstructor(signature);
     end
 end
 }
@@ -219,8 +248,10 @@ do
             error(err_interface_cannot_extend_class, ETEND^clazz.getName(), ident^txt);
         else
             if ext = nil then
+                -- ERROR
                 error(err_unknown_class, ident^txt);
             else
+                -- ERROR
                 error(err_class_cannot_extend_interface, ETEND^clazz, ident^txt);
             end
         end
@@ -240,13 +271,20 @@ do
     impl := IMPL^tdd.get(ident^txt);
     -- Vérifie qu'on peut implémenter l'identifiant spécifié.
     if (impl /= nil & IMPL^clazz.canImplement(impl)) then
-        call IMPL^clazz.setImplemented(impl);
+        if IMPL^clazz.getImplemented() = nil then
+            call IMPL^clazz.setImplemented(impl);
+        else
+            -- ERROR
+            error(err_max_impl_one, IMPL^clazz.getName());
+        end
     else
         -- Une specification du message d'erreur en fonction du type de class (interface
         -- ou classe concrete)
         if IMPL^clazz.isInterfaze() then
+            -- ERROR
             error(err_interface_cannot_implement_class, IMPL^clazz.getName(), ident^txt);
         else
+            -- ERROR
             error(err_unknown_interface, ident^txt);
        end
     end
@@ -267,6 +305,7 @@ DEF ->  TYPE ident pv #attr ;
 #attr {
 do
     if DEF^clazz.hasAttribute(ident^txt) then
+        -- ERROR
         error(err_attribute_already_named, ident^txt);
     else
         call DEF^clazz.addAttribute(ident^txt, TYPE^type);
@@ -288,7 +327,7 @@ do
             -- OK
         else
             -- ERROR
-            -- TODO: Type de retour invalide
+            error(err_wrong_signature, ident^txt);
         end
     else
         -- ERROR
@@ -323,6 +362,7 @@ end
 #downbody{
 do
     MCORPS^tds := tds;
+    MCORPS^returns := TYPE^type;
 end
 }
 
@@ -340,7 +380,7 @@ do
             -- OK
         else
             -- ERROR
-            -- TODO: Type de retour invalide
+            error(err_wrong_signature, ident^txt);
         end
     else
         -- ERROR
@@ -375,6 +415,7 @@ end
 #downbody{
 do
     MCORPS^tds := tds;
+    MCORPS^returns := nil;
 end
 }
 
@@ -387,21 +428,30 @@ do
     if MCORPS^clazz.isInterfaze() then
         -- Rien a faire
     else
+        -- ERROR
         error(err_meth_not_specified, MCORPS^clazz.getName());
     end
 end
 }
 
-MCORPS -> #check BLOC ;
+MCORPS -> #check #down BLOC ;
 
 -- Verifie qu'on est dans une classe concrete !
 #check{
 do
     if MCORPS^clazz.isInterfaze() then
+        -- ERROR
         error(err_meth_body_in_interface, MCORPS^clazz.getName());
     else
         -- Rien à faire
     end
+end
+}
+
+-- Initialise la variable returned
+#down{
+do
+    BLOC^hreturned := false;
 end
 }
 
@@ -414,11 +464,15 @@ global
 -- Verifie la bonne denomination du constructeur
 #checkname {
 do
-    if ident^txt.equals(DEF^clazz.getName()) then
-        -- OK
+    if DEF^clazz.isInterfaze() then
+        error(err_interface_constructor, DEF^clazz.getName());
     else
-        -- ERROR
-        error(err_meth_name, DEF^clazz.getName());
+        if ident^txt.equals(DEF^clazz.getName()) then
+            -- OK
+        else
+            -- ERROR
+            error(err_constructor_name, DEF^clazz.getName());
+        end
     end
 end
 }
@@ -440,7 +494,7 @@ do
         -- OK
     else
         -- ERROR
-        error(err_wrong_signature, PARFS^signature);
+        error(err_constructor, ident^txt);
     end
 end
 }
@@ -449,6 +503,8 @@ end
 #downbody{
 do
     BLOC^tds := tds;
+    BLOC^hreturned := false;
+    BLOC^returns := nil;
 end
 }
 
@@ -483,6 +539,7 @@ do
         TYPE^type := new Pointer(clazz);
     else
         TYPE^type := nil;
+        -- ERROR
         error(err_unknown_class, ident^txt);
     end
 end
@@ -540,20 +597,71 @@ PARF ->  TYPE ident #sign ;
 do
     -- TODO: Vérifier que l'argument n'existe pas déjà dans la tds.
     PARF^type := TYPE^type;
-    call PARF^tds.inserer(ident^txt, new INFO(TYPE^type));
+    if PARF^tds.chercherGlobalement(ident^txt) /= nil then
+        -- ERROR
+        error(err_variable_already_defined, ident^txt);
+    else
+        if PARF^clazz.hasAttribute(ident^txt) then
+            -- ERROR
+            error(err_hidding, ident^txt);
+        else
+            call PARF^tds.inserer(ident^txt, new INFO(TYPE^type));
+        end
+    end
 end
 }
 
 -- corps de methode et bloc d'instructions
-BLOC ->  aco INSTS acf ;
+BLOC -> aco INSTS acf #up ;
+
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    BLOC^sreturned := INSTS^sreturned;
+end
+}
 
 -- instructions
-INSTS -> ;
+INSTS -> #up ;
 
-INSTS -> INST INSTS ;
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    INSTS^sreturned := INSTS^hreturned;
+end
+}
+
+INSTS -> #testReturn INST #transmit INSTS #up ;
+
+-- Passe le statut de retour a INSTS
+#testReturn{
+do
+    if INSTS^hreturned then
+        error(err_unreachable_code);
+    end
+end
+}
+
+-- Remonte les attributs
+--  * sreturned
+#transmit{
+do
+    INSTS1^hreturned := INST^sreturned;
+end
+}
+
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    INSTS^sreturned := INSTS1^sreturned;
+end
+}
 
 -- declaration de variable locale avec ou sans init
-INST-> TYPE ident #check AFFX pv #checktype ;
+INST-> TYPE ident #check AFFX pv #checktype #up ;
 
 -- Teste l'absence de ident dans la tds
 -- et dans la clazz.
@@ -563,15 +671,14 @@ INST-> TYPE ident #check AFFX pv #checktype ;
 local
     info : INFO;
 do
-    if TYPE^type = nil then
-        -- TODO : Undefinded class
-    end
     info := INST^tds.chercherGlobalement(ident^txt);
     if info /= nil then
-        -- TODO: genere le message d'erreur EXISTING
+        -- ERROR
+        error(err_attribute_already_named, ident^txt);
     else
         if INST^clazz.hasAttribute(ident^txt) then
-            -- TODO: generer un message d'erreur HIDDING
+            -- ERROR
+            error(err_hidding, ident^txt);
         end
     end
 end
@@ -584,28 +691,53 @@ do
         if AFFX^type.isType(TYPE^type) then
             call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
         else
-            -- TODO: genere un message d'erreur
+            -- ERROR
+            error(err_type, AFFX^type.getName(), TYPE^type.getName());
         end
     else
     end
 end
 }
 
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    INST^sreturned := INST^hreturned;
+end
+}
+
 -- instruction expression
-INST ->  E pv ;
+INST ->  E pv #up ;
+
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    INST^sreturned := INST^hreturned;
+end
+}
 
 -- bloc d'instructions
-INST -> #tds BLOC ;
+INST -> #tds BLOC #up ;
 
 -- Genere une sous tds pour le bloc
 #tds{
 do
     BLOC^tds := new TDS(INST^tds);
+end
+}
+
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    INST^sreturned := BLOC^sreturned;
 end
 }
 
 -- conditionnelle
-INST -> si paro #tds E parf  BLOC SIX ;
+INST -> si paro #tds E parf BLOC SIX #up ;
 
 -- Genere une sous tds pour le bloc
 #tds{
@@ -614,9 +746,25 @@ do
 end
 }
 
-SIX -> ;
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    INST^sreturned := BLOC^sreturned & SIX^sreturned;
+end
+}
 
-SIX -> sinon #tds BLOC ;
+SIX -> #up ;
+
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    SIX^sreturned := false;
+end
+}
+
+SIX -> sinon #tds BLOC #up ;
 
 -- Genere une sous tds pour le bloc
 #tds{
@@ -625,8 +773,28 @@ do
 end
 }
 
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    SIX^sreturned := BLOC^sreturned;
+end
+}
+
 -- return
-INST ->  retour E pv ;
+INST ->  retour E pv #up ;
+
+-- Remonte les attributs
+--  * sreturned
+#up{
+do
+    INST^sreturned := true;
+    if E^type.isType(INST^returns) then
+    else
+        error(err_return_type, E^type.getName(), INST^returns.getName());
+    end
+end
+}
 
 -- les expressions
 E ->  ER AFFX #checktype #up ;
@@ -638,7 +806,8 @@ do
     if AFFX^type.isType(ER^type) then
         -- OK
     else
-        -- TODO: genere un message d'erreur
+        -- ERROR
+        error(err_type, AFFX^type.getName(), ER^type.getName());
     end
     end
 end
@@ -724,11 +893,11 @@ do
             call OPREL^domain.restrict(0,ES^type);
         else
             -- ERROR
-            -- TODO erreur dans le type de ES
+            error(err_type, ES^type.getName(), OPREL^domain.getType(1));
         end
     else
         -- ERROR
-        -- TODO erreur dans le type de ERX
+        error(err_type, ERX^ltype.getName(), OPREL^domain.getType(0));
     end
 end
 }
@@ -818,11 +987,11 @@ do
             call OPADD^domain.restrict(1,T^type);
         else
             -- ERROR
-            -- TODO erreur dans le type de T
+            error(err_type, T^type.getName(), OPADD^domain.getType(1));
         end
     else
         -- ERROR
-        -- TODO erreur dans le type de ESX
+        error(err_type, ESX^ltype.getName(), OPADD^domain.getType(1));
     end
 end
 }
@@ -830,7 +999,6 @@ end
 -- Passe le type de gauche a ESX
 #down{
 do
-    -- TODO
     ESX1^ltype := OPADD^domain.getReturnType();
 end
 }
@@ -903,18 +1071,17 @@ TX -> OPMUL F #checktype #down TX #up ;
 -- Verifie la compatibilite de ltype et de ES^type avec OPREL^domain
 #checktype{
 do
-    -- TODO
     if OPMUL^domain.accepts(0, TX^ltype) then
         call OPMUL^domain.restrict(0,TX^ltype);
         if OPMUL^domain.accepts(1,F^type) then
             call OPMUL^domain.restrict(0,F^type);
         else
             -- ERROR
-            -- TODO erreur dans le type de F
+            error(err_type, F^type.getName(), OPMUL^domain.getType(1));
         end
     else
         -- ERROR
-        -- TODO erreur dans le type de TX
+            error(err_type, TX^ltype.getName(), OPMUL^domain.getType(1));
     end
 end
 }
@@ -922,7 +1089,6 @@ end
 -- Passe le type de gauche a ESX
 #down{
 do
-    -- TODO
     TX1^ltype := OPMUL^domain.getReturnType();
 end
 }
@@ -1018,12 +1184,11 @@ F ->  OPUN F #checktype #up ;
 -- Verifie la compatibilite de ltype et de ES^type avec OPUN^domain
 #checktype{
 do
-    -- TODO
     if OPUN^domain.accepts(0, F1^type) then
         call OPUN^domain.restrict(0,F1^type);
     else
         -- ERROR
-        -- TODO erreur dans le type de F
+        error(err_type, F1^type.getName(), OPUN^domain.getType(0));
     end
 end
 }
@@ -1032,7 +1197,6 @@ end
 --  * type
 #up{
 do
-    -- TODO: Gerer la modification eventuelle par operation
     F^type := OPUN^domain.getReturnType();
 end
 }
@@ -1111,11 +1275,11 @@ do
                     -- Et quel constructeur on prend pour Toto(c) avec c de classe C ???
             else
                 -- ERROR
-                -- TODO erreur constructeur inconnu
+                error(err_unknown_constructor, ARGS^signature);
             end
         else
             -- ERROR
-            -- TODO On ne peut instancier un type primitif de cette maniere
+            error(err_primitive_type);
     end
 end
 }
@@ -1181,7 +1345,8 @@ do
             Q1^ltype := clazz.getAttribute(ident^txt);
             Q1^lname := ident^txt;
         else
-            -- TODO: Genere un erreur
+            -- ERROR
+            error(err_primitive_types_have_no_fields);
     end
 end
 }
@@ -1204,12 +1369,12 @@ local
 do
     if Q^lclazz = nil then
         -- ERROR
-        -- TODO on ne peut pas avoir un appel de method sur un type !
+        error(err_primitive_types_have_no_method);
     else
         methodList := Q^lclazz.getMethodList(Q^lname);
-        if methodist /= nil then
+        if methodList /= nil then
             -- ERROR
-            -- TODO pas de methode definies sous ce nom !
+            error(err_no_such_method, Q^lname, Q^clazz.getName());
             if methodList.doAccept(ARGS^signature) then
                 -- C'est ok
             -- DISCUSS
@@ -1225,11 +1390,11 @@ do
                 Q1^lclazz := nil;
                 Q1^lname := nil;
             else
-                -- TODO: Generer une erreur: parametres d'appel incorrects
+                error(err_wrong_signature_call, Q^lname, ARGS^signature);
             end
         else
             -- ERROR
-            -- TODO: Generer une erreur: pas de methode portant ce nom
+            error(err_no_such_method, Q^lname, Q^clazz.getName());
         end
     end
 end

@@ -54,4 +54,14 @@ public class Domain {
 	public DTYPE getReturnType() {
 		return returnType;
 	}
+
+	/**
+	 * Gives a type accepted at the given position
+	 * 
+	 * @param position the position
+	 * @return the type accepted
+	 */
+	public DTYPE getType(int position) {
+		return types[position];
+	}
 }

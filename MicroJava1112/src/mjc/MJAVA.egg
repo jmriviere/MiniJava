@@ -1275,7 +1275,7 @@ do
                     -- Et quel constructeur on prend pour Toto(c) avec c de classe C ???
             else
                 -- ERROR
-                error(err_unknown_constructor, ARGS^signature);
+                error(err_unknown_constructor, ARGS^signature.toString());
             end
         else
             -- ERROR

@@ -247,7 +247,7 @@ public class Clazz extends DTYPE {
 		if (getReturnTypeOfMethod(methodName)==null) {
 			return true;
 		}
-		return type.equals(getReturnTypeOfMethod(methodName));
+		return type.compareTo(getReturnTypeOfMethod(methodName));
 	}
 
 	/**

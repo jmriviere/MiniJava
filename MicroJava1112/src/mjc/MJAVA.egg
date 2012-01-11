@@ -1298,10 +1298,17 @@ F ->  ident #down Q #up ;
 #down{
 local
     info : INFO;
+    attribut :DTYPE;
 do
    info := F^tds.chercherGlobalement(ident^txt);
     if info = nil then
-        Q^ltype := F^clazz.getAttribute(ident^txt);
+         attribut := F^clazz.getAttribute(ident^txt);
+         if attribut = nil then
+         --Error
+            error(err_no_attribut, ident^txt);
+         else 
+            Q^ltype := attribut;
+         end
     else
         Q^ltype := info.getType();
     end

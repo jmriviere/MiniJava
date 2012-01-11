@@ -2,7 +2,7 @@ interface Test {
 int getx();
 int lol();
 }
-class Point implements lol {
+class Point {
   int x;
   int y;
   Point origine;

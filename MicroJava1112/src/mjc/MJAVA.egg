@@ -1372,9 +1372,10 @@ do
         error(err_primitive_types_have_no_method);
     else
         methodList := Q^lclazz.getMethodList(Q^lname);
-        if methodList /= nil then
+        if methodList = nil then
             -- ERROR
-            error(err_no_such_method, Q^lname, Q^clazz.getName());
+            error(err_no_such_method, Q^lname, Q^lclazz.getName());
+        else
             if methodList.doAccept(ARGS^signature) then
                 -- C'est ok
             -- DISCUSS
@@ -1392,9 +1393,6 @@ do
             else
                 error(err_wrong_signature_call, Q^lname, ARGS^signature);
             end
-        else
-            -- ERROR
-            error(err_no_such_method, Q^lname, Q^clazz.getName());
         end
     end
 end

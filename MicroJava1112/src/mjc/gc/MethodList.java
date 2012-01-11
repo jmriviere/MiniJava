@@ -157,7 +157,7 @@ public class MethodList implements Cloneable {
 		if (returnType == null) {
 			if (other.returnType != null)
 				return false;
-		} else if (!returnType.equals(other.returnType))
+		} else if (!returnType.compareTo(other.returnType))
 			return false;
 		return true;
 	}

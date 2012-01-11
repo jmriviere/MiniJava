@@ -167,9 +167,18 @@ public class MethodList implements Cloneable {
 	 */
 	@Override
 	public String toString() {
-		String ret = "\n";
+		String ret = "";
 		for (Signature signature : signatures) {
-			ret += "+"+name+"("+signature+"):"+returnType;
+			ret += "+"+name+"("+signature+")";
+			if (returnType!=null) {
+				if (returnType.nom.equals("Null")) {
+					ret += ":void\n";
+				} else {
+					ret += ":" + returnType + "\n";
+				}
+			} else {
+				ret += "\n";
+			}
 		}
 		return ret;
 	}

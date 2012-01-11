@@ -93,7 +93,7 @@ end
 local
 do
     call machine.writeCode(PROGRAMME^source.getFileName(), "");
-    write "table des classes " + t;
+    write "table des classes \n" + t;
 end
 }
 
@@ -127,6 +127,7 @@ do
     -- Vérifie que l'identifiant de la classe n'existe pas déjà.
     info := DEFCLASSE^tdd.containsKey(ident^txt);
     if info then
+        -- ERROR
         error(err_class_exists, ident^txt);
     else
         -- Ajout à la table des déclarations.
@@ -161,6 +162,8 @@ do
     info := DEFINTERFACE^tdd.containsKey(ident^txt);
     if info then
         -- Ne fait rien puisque la declaration de la classe est invalide
+        -- ERROR
+        error(err_class_exists, ident^txt);
     else
         -- Ajout à la table de déclarations.
         call DEFINTERFACE^tdd.put(ident^txt, clazz);
@@ -174,11 +177,17 @@ SUPER -> ETEND IMPL #checkcompatible ;
 
 -- Teste la compatibilite de ETEND et IMPL
 #checkcompatible{
+local
+    extend : Clazz;
+    impl : Clazz;
 do
     if SUPER^clazz.testExtendImplementCompatible() then
         -- Le cas cool, rien a faire, pas de problemes
     else
-        -- TODO Generer une erreur : incompatibilite de signatures entre l'extend et l'implement
+        -- ERROR
+        extend := SUPER^clazz.getExtended();
+        impl := SUPER^clazz.getImplemented();
+        error(err_extend_and_implement_incompatible, extend.getName(), impl.getName());
     end
 end
 }
@@ -199,12 +208,14 @@ do
         if ETEND^clazz.getExtended() = nil then
             call ETEND^clazz.setExtended(ext);
         else
+            -- ERROR
             error(err_max_ext_one, ETEND^clazz.getName());
         end
     else
         -- Une specification du message d'erreur en fonction du type de class (interface
         -- ou classe concrete)
         if ETEND^clazz.isInterfaze() then
+            -- ERROR
             error(err_interface_cannot_extend_class, ETEND^clazz.getName(), ident^txt);
         else
             if ext = nil then
@@ -471,6 +482,7 @@ do
     if clazz /= nil then
         TYPE^type := new Pointer(clazz);
     else
+        TYPE^type := nil;
         error(err_unknown_class, ident^txt);
     end
 end
@@ -551,6 +563,9 @@ INST-> TYPE ident #check AFFX pv #checktype ;
 local
     info : INFO;
 do
+    if TYPE^type = nil then
+        -- TODO : Undefinded class
+    end
     info := INST^tds.chercherGlobalement(ident^txt);
     if info /= nil then
         -- TODO: genere le message d'erreur EXISTING
@@ -565,10 +580,13 @@ end
 -- Teste la compatibilite des types et affecte ident dans la tds.
 #checktype{
 do
-    if AFFX^type.isType(TYPE^type) then
-        call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
+    if AFFX^type /= nil then
+        if AFFX^type.isType(TYPE^type) then
+            call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
+        else
+            -- TODO: genere un message d'erreur
+        end
     else
-        -- TODO: genere un message d'erreur
     end
 end
 }
@@ -1189,22 +1207,29 @@ do
         -- TODO on ne peut pas avoir un appel de method sur un type !
     else
         methodList := Q^lclazz.getMethodList(Q^lname);
-        if methodList.doAccept(ARGS^signature) then
-            -- C'est ok
-        -- DISCUSS
-        -- On a un petit probleme en cas d'ambiguite. Je m'explique :
-        -- les methodes Toto(A a) et Toto(B b) sont definies.
-        --   - Aucune relation entre A et B
-        --   - A est une classe concrete
-        --   - B est une interface
-        --
-        -- maintenant on construit une classe C extend A implements B...
-        -- Et quel methode on prend pour Toto(c) avec c de classe C ???
-            Q1^ltype := methodList.getReturnType();
-            Q1^lclazz := nil;
-            Q1^lname := nil;
+        if methodist /= nil then
+            -- ERROR
+            -- TODO pas de methode definies sous ce nom !
+            if methodList.doAccept(ARGS^signature) then
+                -- C'est ok
+            -- DISCUSS
+            -- On a un petit probleme en cas d'ambiguite. Je m'explique :
+            -- les methodes Toto(A a) et Toto(B b) sont definies.
+            --   - Aucune relation entre A et B
+            --   - A est une classe concrete
+            --   - B est une interface
+            --
+            -- maintenant on construit une classe C extend A implements B...
+            -- Et quel methode on prend pour Toto(c) avec c de classe C ???
+                Q1^ltype := methodList.getReturnType();
+                Q1^lclazz := nil;
+                Q1^lname := nil;
+            else
+                -- TODO: Generer une erreur: parametres d'appel incorrects
+            end
         else
-            -- TODO: Generer une erreur: parametres d'appel incorrects
+            -- ERROR
+            -- TODO: Generer une erreur: pas de methode portant ce nom
         end
     end
 end

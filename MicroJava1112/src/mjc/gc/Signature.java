@@ -40,4 +40,22 @@ public class Signature extends ArrayList<DTYPE> {
 		}
 		return false;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		
+		String str = "";
+		if (!isEmpty()) {
+			str += this.get(0);
+		}
+		for (int i = 1; i < this.size(); i++) {
+			str += ", " + this.get(i);
+		}
+		return str;
+	}
+
+	
 }

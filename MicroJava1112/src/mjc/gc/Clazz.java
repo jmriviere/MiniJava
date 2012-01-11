@@ -38,6 +38,7 @@ public class Clazz extends DTYPE {
 	 */
 	public Clazz(String name, boolean interfaze) {
 		super(name, 0);
+		this.name = name;
 		this.interfaze = interfaze;
 		attributes = new HashMap<String, DTYPE>();
 		methods = new HashMap<String, MethodList>();
@@ -208,12 +209,19 @@ public class Clazz extends DTYPE {
 	 * Returns a set of signature that posses the given name.
 	 * 
 	 * @param methodName the name of the method
-	 * @return the set of method signatures with that name
+	 * @return the set of method signatures with that name. null if if does not exists.
 	 */
 	public MethodList getMethodList(String methodName) {
-		MethodList ret = (MethodList) methods.get(methodName).clone();
+		MethodList ret=null;
+		if (methods.containsKey(methodName)) {
+			ret = (MethodList) methods.get(methodName).clone();
+		}
 		if (extended != null) {
-			ret.merge(extended.getMethodList(methodName));			
+			if (ret != null) {
+				ret.merge(extended.getMethodList(methodName));
+			} else {
+				ret = extended.getMethodList(methodName);
+			}
 		}
 		return ret;
 	}
@@ -378,10 +386,32 @@ public class Clazz extends DTYPE {
 	 */
 	@Override
 	public String toString() {
-		return "Clazz [interfaze=" + interfaze + ", extended=" + extended
-				+ ", implemented=" + implemented + ", attributes=" + attributes
-				+ "\n--- methods ---" + methods.values() + "\n--- constructors ---" + constructors
-				+ "]";
+		String str = "";
+		if (interfaze) {
+			str += "  <Interface>\n";
+		}
+		str += name + "\n";
+		if (extended != null) {
+			str += " |-> "+extended.getName() + "\n";
+		}
+		if (implemented != null) {
+			str += " |->" + implemented.name + "\n";
+		}
+		if (!interfaze) {
+			str += "---------------\n  Attributes\n---------------\n";
+			for (String attributeName : attributes.keySet()) {
+				str += "+" + attributeName +":" + attributes.get(attributeName) + "\n";
+			}			
+		}
+		str += "---------------\n    Methods\n---------------\n";
+		for (String methodName : methods.keySet()) {
+			str += methods.get(methodName);
+		}
+		if (!interfaze) {
+			str += "---------------\n Constructors\n---------------\n";
+			str += constructors;
+		}
+		return str;
 	}
 	
 }

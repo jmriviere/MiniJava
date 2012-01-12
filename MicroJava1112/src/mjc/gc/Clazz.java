@@ -46,6 +46,14 @@ public class Clazz extends DTYPE {
 	}
 	
 	/**
+	 * Returns the name of the class
+	 */
+	
+	public String getName() {
+		return name;
+	}
+	
+	/**
 	 * Tests the interface state of the class. If false, it is a concrete class.
 	 * 
 	 * @return whether it is an interface or not

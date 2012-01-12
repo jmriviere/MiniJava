@@ -68,4 +68,12 @@ public interface IGenerator {
 	String generateMultiplicationOperation(String att_lcode, String att_code,
 			String att_code2);
 
+	String generateGetAttribute(String attr_name, Clazz clazz);
+	
+	String generateGetVariable(String name);
+	
+	String generateMethodCall(MethodList m_list, String m_name);
+	
+	// TODO: mettre des noms de paramètres explicites
+	String generateQualification(String toto, String tata);
 }

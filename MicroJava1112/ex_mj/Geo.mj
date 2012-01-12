@@ -79,7 +79,7 @@ class Geo {
     Point p1 = new Point();
     PointCol pc = new PointCol();
     int l;
-    p.init(5,4);
+    p.lol;
     p1.init(6,2);
     pc.init(6,1);
     Point m ;

@@ -192,4 +192,28 @@ public class MockGenerator implements IGenerator {
 		return null;
 	}
 
+	@Override
+	public String generateGetAttribute(String attr_name, Clazz clazz) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String generateGetVariable(String name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String generateMethodCall(MethodList m_list, String m_name) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String generateQualification(String toto, String tata) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

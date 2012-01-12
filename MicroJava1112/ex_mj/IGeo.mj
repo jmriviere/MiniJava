@@ -68,6 +68,7 @@ class Main extends Object{
     IPoint p = new Point(5,4);
     IPoint p1 = new Point(6,2);
     PointCol pc = new PointCol(6,1,99);
+    Point pt = new Point();
     Point m ;
     m = p.milieu(p1);
     IPoint m1 = null ;

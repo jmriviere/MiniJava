@@ -18,9 +18,10 @@ inh clazz : Clazz for SUPER, CORPS, ETEND, IMPL, DEFS, DEF, PARFS, PARFSX, PARF,
 
 -- Le TYPAGE
 syn type : DTYPE for TYPE, PARF, AFFX, E, ER, ERX, ES, ESX, T, TX, F, Q;
-inh ltype : DTYPE for ERX, ESX, TX, Q;
-inh lclazz : Clazz for Q;
+inh ltype : DTYPE for ERX, ESX, TX;
 inh lname : STRING for Q;
+inh lclazz : Clazz for Q;
+inh isFirst : BOOLEAN for Q;
 
 -- La signature des methodes
 syn signature : Signature for PARFS, PARFSX, ARGS, ARGSX;
@@ -34,6 +35,14 @@ inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS, SIX, E, AFFX, 
 inh returns : DTYPE for MCORPS, BLOC, INSTS, INST, SIX;
 inh hreturned : BOOLEAN for BLOC, INSTS, INST, SIX;
 syn sreturned : BOOLEAN for BLOC, INSTS, INST, SIX;
+
+-- La generation de code
+inh generator : IGenerator for PROGRAMME, ENTITES, DEFCLASSE, DEFINTERFACE, CORPS, DEFS, DEF,
+                                MCORPS, BLOC, INSTS, INST, SIX, E, AFFX, ER, ERX, ES, ESX, T,
+                                TX, F, Q, ARGSX, ARGS, OPREL, OPADD, OPMUL, OPUN;
+syn code : String for ARGS, ARGSX, Q, F, TX, T, ESX, ES, ERX, ER, AFFX, E, SIX, INSTS, INST,
+                        BLOC, MCORPS, DEFINTERFACE, DEFCLASSE, ENTITES, OPREL, OPADD, OPMUL, OPUN;
+inh lcode : String for TX, ESX, ERX;
 
 -- les terminaux 
 
@@ -92,31 +101,54 @@ do
    machine := PROGRAMME^source.getMachine();
    t := new TDD();
    ENTITES^tdd := t;
+   ENTITES^generator := new MockGenerator();
 end
 }
 
 #gen {
 local
 do
-    call machine.writeCode(PROGRAMME^source.getFileName(), "");
+    call machine.writeCode(PROGRAMME^source.getFileName(), ENTITES^code);
     write "table des classes \n" + t;
 end
 }
 
 -- Entites : Declaration of classes and interfaces
-ENTITES -> ;
+ENTITES -> #gen ;
 
-ENTITES -> DEFCLASSE ENTITES  ;
+-- Generation du code
+#gen{
+do
+    ENTITES^code := "";
+end
+}
 
-ENTITES -> DEFINTERFACE ENTITES  ;
+ENTITES -> DEFCLASSE ENTITES #gen ;
+
+-- Generation du code
+#gen{
+do
+    ENTITES^code := ENTITES^generator.concatenateEntities(DEFCLASSE^code, ENTITES1^code);
+end
+}
+
+ENTITES -> DEFINTERFACE ENTITES #gen ;
+
+-- Generation du code
+#gen{
+do
+    ENTITES^code := ENTITES^generator.concatenateEntities(DEFINTERFACE^code, ENTITES1^code);
+end
+}
 
 -- definition d'une classe
-DEFCLASSE -> classe ident #down #tdd SUPER CORPS #check ;
+DEFCLASSE -> classe ident #down #tdd SUPER CORPS #check #gen ;
 
 -- La classe.
 global
     clazz : Clazz;
     info : BOOLEAN;
+    generate : BOOLEAN;
 
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
@@ -134,9 +166,11 @@ do
     info := DEFCLASSE^tdd.containsKey(ident^txt);
     if info then
         -- ERROR
+        generate := false;
         error(err_class_exists, ident^txt);
     else
         -- Ajout à la table des déclarations.
+        generate := true;
         call DEFCLASSE^tdd.put(ident^txt, clazz);
     end
 end
@@ -151,16 +185,20 @@ local
     signature : Signature;
 do
     if clazz.checkImplements() then
+        generate := generate & true;
     else
         impl := clazz.getImplemented();
         error(err_implement, clazz.getName(), impl.getName());
+        generate := generate & false;
     end
-    method := clazz.getConstructors();
-    signature := new Signature();
-    if method.doAccept(signature) then
-        -- Le constructeur par defaut a ete redefini
-    else
-        call clazz.addConstructor(signature);
+end
+}
+
+-- Generation du code
+#gen{
+do
+    if generate then
+        DEFCLASSE^code := DEFCLASSE^generator.generateClazz(clazz);
     end
 end
 }
@@ -168,12 +206,13 @@ end
 --DEFCLASSE -> classe ident etend ident CORPS ;
 --DEFCLASSE -> classe ident implemente ident CORPS ;
 --DEFCLASSE -> classe ident etend ident implemente ident CORPS ;
-DEFINTERFACE -> interface ident #down #tdd SUPER CORPS;
+DEFINTERFACE -> interface ident #down #tdd SUPER CORPS #gen ;
 
 -- La classe.
 global
     clazz : Clazz;
     info : BOOLEAN;
+    generate : BOOLEAN;
 
 -- Cree l'objet classe et le passe en attribut a SUPER et CORPS
 #down {
@@ -192,10 +231,21 @@ do
     if info then
         -- Ne fait rien puisque la declaration de la classe est invalide
         -- ERROR
+        generate := false;
         error(err_class_exists, ident^txt);
     else
         -- Ajout à la table de déclarations.
         call DEFINTERFACE^tdd.put(ident^txt, clazz);
+        generate := true;
+    end
+end
+}
+
+-- Generation du code
+#gen{
+do
+    if generate then
+        DEFINTERFACE^code := DEFINTERFACE^generator.generateClazz(clazz);
     end
 end
 }
@@ -314,10 +364,11 @@ end
 }
 
 -- methode (fonction) 
-DEF ->  TYPE ident #checkname paro #down PARFS parf #check #downbody MCORPS ;
+DEF ->  TYPE ident #checkname paro #down PARFS parf #check #downbody MCORPS #gen ;
 
 global
     tds : TDS;
+    generate : BOOLEAN;
     
 -- Verifie la bonne denomination de la methode
 #checkname {
@@ -346,13 +397,13 @@ end
 
 -- Verifie la validite de la signature
 #check{
-local
-    
 do
     if DEF^clazz.addMethod(ident^txt, TYPE^type, PARFS^signature) then
         -- OK
+        generate := true;
     else
         -- ERROR
+        generate := false;
         error(err_wrong_signature, PARFS^signature);
     end
 end
@@ -366,11 +417,21 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    if generate then
+--        call DEF^clazz.addMethodCode(DEF^generator.generateMethod(ident^txt, MCORPS^code));
+    end
+end
+}
+
 -- methode (procedure)
-DEF ->  void ident #checkname paro #down PARFS parf #check #downbody MCORPS ;
+DEF ->  void ident #checkname paro #down PARFS parf #check #downbody MCORPS #gen ;
 
 global
     tds : TDS;
+    generate : BOOLEAN;
     
 -- Verifie la bonne denomination de la methode
 #checkname {
@@ -399,13 +460,13 @@ end
 
 -- Verifie la validite de la signature
 #check{
-local
-    
 do
     if DEF^clazz.addMethod(ident^txt, new DTYPE("Null", 1), PARFS^signature) then
         -- OK
+        generate := true;
     else
         -- ERROR
+        generate := false;
         error(err_wrong_signature, PARFS^signature);
     end
 end
@@ -419,8 +480,17 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    if generate then
+--        call DEF^clazz.addMethodCode(DEF^generator.generateMethod(ident^txt, MCORPS^code));
+    end
+end
+}
+
 -- dans classe ou dans interface
-MCORPS -> pv #check ;
+MCORPS -> pv #check #gen ;
 
 -- Verifie qu'on est dans une interface !
 #check{
@@ -434,7 +504,14 @@ do
 end
 }
 
-MCORPS -> #check #down BLOC ;
+-- Generation du code
+#gen{
+do
+    MCORPS^code := "";
+end
+}
+
+MCORPS -> #check #down BLOC #gen ;
 
 -- Verifie qu'on est dans une classe concrete !
 #check{
@@ -455,11 +532,19 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    MCORPS^code := BLOC^code;
+end
+}
+
 -- constructeur
-DEF -> ident #checkname paro #down PARFS #check parf #downbody BLOC ;
+DEF -> ident #checkname paro #down PARFS #check parf #downbody BLOC #gen ;
 
 global
     tds : TDS;
+    generate : BOOLEAN;
     
 -- Verifie la bonne denomination du constructeur
 #checkname {
@@ -492,8 +577,10 @@ local
 do
     if DEF^clazz.addConstructor(PARFS^signature) then
         -- OK
+        generate := true;
     else
         -- ERROR
+        generate := false;
         error(err_constructor, ident^txt);
     end
 end
@@ -505,6 +592,15 @@ do
     BLOC^tds := tds;
     BLOC^hreturned := false;
     BLOC^returns := nil;
+end
+}
+
+-- Generation du code
+#gen{
+do
+    if generate then
+--        call DEF^clazz.addConstructorCode(DEF^generator.generateConstructor(BLOC^code));
+    end
 end
 }
 
@@ -612,7 +708,7 @@ end
 }
 
 -- corps de methode et bloc d'instructions
-BLOC -> aco INSTS acf #up ;
+BLOC -> aco INSTS acf #up #gen ;
 
 -- Remonte les attributs
 --  * sreturned
@@ -622,8 +718,15 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    BLOC^code := BLOC^generator.generateBloc(INSTS^code);
+end
+}
+
 -- instructions
-INSTS -> #up ;
+INSTS -> #up #gen ;
 
 -- Remonte les attributs
 --  * sreturned
@@ -633,13 +736,26 @@ do
 end
 }
 
-INSTS -> #testReturn INST #transmit INSTS #up ;
+-- Generation du code
+#gen{
+do
+    INSTS^code := "";
+end
+}
+
+INSTS -> #testReturn INST #transmit INSTS #up #gen ;
+
+global
+    generate : BOOLEAN;
 
 -- Passe le statut de retour a INSTS
 #testReturn{
 do
     if INSTS^hreturned then
+        generate := false;
         error(err_unreachable_code);
+    else
+        generate := true;
     end
 end
 }
@@ -660,8 +776,20 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    if generate then
+        INSTS^code := INSTS^generator.generateSequence(INST^code, INSTS1^code);
+    end
+end
+}
+
 -- declaration de variable locale avec ou sans init
-INST-> TYPE ident #check AFFX pv #checktype #up ;
+INST-> TYPE ident #check AFFX pv #checktype #up #gen ;
+
+global
+    generate : BOOLEAN;
 
 -- Teste l'absence de ident dans la tds
 -- et dans la clazz.
@@ -674,11 +802,15 @@ do
     info := INST^tds.chercherGlobalement(ident^txt);
     if info /= nil then
         -- ERROR
+        generate := false;
         error(err_attribute_already_named, ident^txt);
     else
         if INST^clazz.hasAttribute(ident^txt) then
             -- ERROR
+            generate := false;
             error(err_hidding, ident^txt);
+        else
+            generate := true;
         end
     end
 end
@@ -692,6 +824,7 @@ do
             call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
         else
             -- ERROR
+            generate := false;
             error(err_type, AFFX^type.getName(), TYPE^type.getName());
         end
     else
@@ -707,8 +840,17 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    if generate then
+        INST^code := INST^generator.generateAffectation(ident^txt, AFFX^code);
+    end
+end
+}
+
 -- instruction expression
-INST ->  E pv #up ;
+INST ->  E pv #up #gen ;
 
 -- Remonte les attributs
 --  * sreturned
@@ -718,8 +860,15 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    INST^code := E^code;
+end
+}
+
 -- bloc d'instructions
-INST -> #tds BLOC #up ;
+INST -> #tds BLOC #up #gen ;
 
 -- Genere une sous tds pour le bloc
 #tds{
@@ -736,8 +885,15 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    INST^code := BLOC^code;
+end
+}
+
 -- conditionnelle
-INST -> si paro #tds E parf BLOC SIX #up ;
+INST -> si paro #tds E parf BLOC SIX #up #gen ;
 
 -- Genere une sous tds pour le bloc
 #tds{
@@ -754,7 +910,14 @@ do
 end
 }
 
-SIX -> #up ;
+-- Generation du code
+#gen{
+do
+    INST^code := INST^generator.generateIfThenElse(E^code, BLOC^code, SIX^code);
+end
+}
+
+SIX -> #up #gen ;
 
 -- Remonte les attributs
 --  * sreturned
@@ -764,7 +927,14 @@ do
 end
 }
 
-SIX -> sinon #tds BLOC #up ;
+-- Generation du code
+#gen{
+do
+    SIX^code := "";
+end
+}
+
+SIX -> sinon #tds BLOC #up #gen ;
 
 -- Genere une sous tds pour le bloc
 #tds{
@@ -781,8 +951,18 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    SIX^code := BLOC^code;
+end
+}
+
 -- return
-INST ->  retour E pv #up ;
+INST ->  retour E pv #up #gen ;
+
+global
+    generate : BOOLEAN;
 
 -- Remonte les attributs
 --  * sreturned
@@ -791,22 +971,37 @@ do
     INST^sreturned := true;
     if E^type.isType(INST^returns) then
     else
+        generate := false;
         error(err_return_type, E^type.getName(), INST^returns.getName());
     end
 end
 }
 
+-- Generation du code
+#gen{
+do
+    if generate then
+        INST^code := INST^generator.generateReturn(E^code);
+    end
+end
+}
+
 -- les expressions
-E ->  ER AFFX #checktype #up ;
+E ->  ER AFFX #checktype #up #gen ;
+
+global
+    generate : BOOLEAN;
 
 -- Teste la compatibilite des types
 #checktype{
 do
+    generate := true;
     if AFFX^type /= nil then
     if AFFX^type.isType(ER^type) then
         -- OK
     else
         -- ERROR
+        generate := false;
         error(err_type, AFFX^type.getName(), ER^type.getName());
     end
     end
@@ -825,8 +1020,21 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    if AFFX^code.equals("") then
+        E^code := ER^code;
+    else
+        if generate then
+            E^code := E^generator.generateAffectation(ER^code, AFFX^code);
+        end
+    end
+end
+}
+
 -- affectation
-AFFX ->  affect ER #up ;
+AFFX ->  affect ER #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -836,7 +1044,14 @@ do
 end
 }
 
-AFFX -> #up ;
+-- Generation du code
+#gen{
+do
+    AFFX^code := ER^code;
+end
+}
+
+AFFX -> #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -846,13 +1061,27 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    AFFX^code := "";
+end
+}
+
 -- relation
-ER -> ES #down ERX #up ;
+ER -> ES #down #gendown ERX #up #gen ;
 
 -- Passe le type de gauche a ERX
 #down{
 do
     ERX^ltype := ES^type;
+end
+}
+
+-- Generation du code de gauche
+#gendown{
+do
+    ERX^lcode := ES^code;
 end
 }
 
@@ -864,12 +1093,26 @@ do
 end
 }
 
-ES ->  T #down ESX #up ;
+-- Generation du code
+#gen{
+do
+    ER^code := ERX^code;
+end
+}
+
+ES ->  T #down #gendown ESX #up #gen ;
 
 -- Passe le type de gauche a ESX
 #down{
 do
     ESX^ltype := T^type;
+end
+}
+
+-- Generation du code
+#gendown{
+do
+    ESX^lcode := T^code;
 end
 }
 
@@ -881,22 +1124,34 @@ do
 end
 }
 
-ERX ->  OPREL ES #checktype #up ;
+-- Generation du code
+#gen{
+do
+    ES^code := ESX^code;
+end
+}
+
+ERX ->  OPREL ES #checktype #up #gen ;
+
+global
+    generate : BOOLEAN;
 
 -- Verifie la compatibilite de ltype et de ES^type avec OPREL^domain
 #checktype{
 do
-    -- TODO
+    generate := true;
     if OPREL^domain.accepts(0, ERX^ltype) then
         call OPREL^domain.restrict(0,ERX^ltype);
         if OPREL^domain.accepts(1,ES^type) then
             call OPREL^domain.restrict(0,ES^type);
         else
             -- ERROR
+            generate := false;
             error(err_type, ES^type.getName(), OPREL^domain.getType(1));
         end
     else
         -- ERROR
+        generate := false;
         error(err_type, ERX^ltype.getName(), OPREL^domain.getType(0));
     end
 end
@@ -910,7 +1165,14 @@ do
 end
 }
 
-ERX -> #up ;
+-- Generation du code
+#gen{
+do
+    ERX^code := ERX^generator.generateRelativeOperation(ERX^lcode, ES^code, OPREL^code);
+end
+}
+
+ERX -> #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -920,7 +1182,14 @@ do
 end
 }
 
-OPREL -> inf #up ;
+-- Generation du code
+#gen{
+do
+    ERX^code := "";
+end
+}
+
+OPREL -> inf #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -929,7 +1198,14 @@ do
 end
 }
 
-OPREL -> infeg #up ;
+-- Generation du code
+#gen{
+do
+    OPREL^code := OPREL^generator.generateInf();
+end
+}
+
+OPREL -> infeg #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -938,7 +1214,14 @@ do
 end
 }
 
-OPREL -> sup #up ;
+-- Generation du code
+#gen{
+do
+    OPREL^code := OPREL^generator.generateInfEq();
+end
+}
+
+OPREL -> sup #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -947,7 +1230,14 @@ do
 end
 }
 
-OPREL -> supeg #up ;
+-- Generation du code
+#gen{
+do
+    OPREL^code := OPREL^generator.generateSup();
+end
+}
+
+OPREL -> supeg #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -956,7 +1246,14 @@ do
 end
 }
 
-OPREL -> eg #up ;
+-- Generation du code
+#gen{
+do
+    OPREL^code := OPREL^generator.generateSupEq();
+end
+}
+
+OPREL -> eg #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -965,32 +1262,51 @@ do
 end
 }
 
-OPREL -> neg #up ;
+-- Generation du code
+#gen{
+do
+    OPREL^code := OPREL^generator.generateEq();
+end
+}
+
+OPREL -> neg #up #gen ;
 
 -- Remonte le domaine
 #up{
 do
     OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
+end
+}
+
+-- Generation du code
+#gen{
+do
+    OPREL^code := OPREL^generator.generateNEq();
 end
 }
 
 -- addition, ...
-ESX -> OPADD T #checktype #down ESX #up ;
+ESX -> OPADD T #checktype #down #gendown ESX #up #gen ;
 
+global
+    generate : BOOLEAN;
+    
 -- Verifie la compatibilite de ltype et de ES^type avec OPADD^domain
 #checktype{
 do
-    -- TODO
+    generate := true;
     if OPADD^domain.accepts(0, ESX^ltype) then
         call OPADD^domain.restrict(0,ESX^ltype);
         if OPADD^domain.accepts(1,T^type) then
             call OPADD^domain.restrict(1,T^type);
         else
             -- ERROR
+            generate := false;
             error(err_type, T^type.getName(), OPADD^domain.getType(1));
         end
     else
         -- ERROR
+        generate := false;
         error(err_type, ESX^ltype.getName(), OPADD^domain.getType(1));
     end
 end
@@ -1003,6 +1319,21 @@ do
 end
 }
 
+-- Generation du code
+#gendown{
+do
+    if generate then
+        if ESX^lcode.equals("") then
+            -- Erreur avant !
+        else
+            ESX1^lcode := ESX^generator.generateAdditionOperation(ESX^lcode, T^code, OPADD^code);
+        end
+    else
+        ESX1^lcode := "";
+    end
+end
+}
+
 -- Remonte les attributs :
 --  * type
 #up{
@@ -1011,7 +1342,14 @@ do
 end
 }
 
-ESX -> #up ;
+-- Generation du code
+#gen{
+do
+    ESX^code := ESX1^code;
+end
+}
+
+ESX -> #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -1021,7 +1359,14 @@ do
 end
 }
 
-OPADD -> plus #up ;
+-- Generation du code
+#gen{
+do
+    ESX^code := "";
+end
+}
+
+OPADD -> plus #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1030,7 +1375,14 @@ do
 end
 }
 
-OPADD -> moins #up ;
+-- Generation du code
+#gen{
+do
+    OPADD^code := OPADD^generator.generatePlus();
+end
+}
+
+OPADD -> moins #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1039,7 +1391,14 @@ do
 end
 }
 
-OPADD -> ou #up ;
+-- Generation du code
+#gen{
+do
+    OPADD^code := OPADD^generator.generateMinus();
+end
+}
+
+OPADD -> ou #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1048,12 +1407,26 @@ do
 end
 }
 
-T ->  F #down TX #up ;
+-- Generation du code
+#gen{
+do
+    OPADD^code := OPADD^generator.generateOr();
+end
+}
+
+T ->  F #down #gendown TX #up #gen ;
 
 -- Passe le type de gauche a ESX
 #down{
 do
     TX^ltype := F^type;
+end
+}
+
+-- Generation du code
+#gendown{
+do
+    TX^lcode := F^code;
 end
 }
 
@@ -1065,22 +1438,35 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    T^code := TX^code;
+end
+}
+
 -- multiplication, ...
-TX -> OPMUL F #checktype #down TX #up ;
+TX -> OPMUL F #checktype #down #gendown TX #up #gen ;
+
+global
+    generate : BOOLEAN;
 
 -- Verifie la compatibilite de ltype et de ES^type avec OPREL^domain
 #checktype{
 do
+    generate := true;
     if OPMUL^domain.accepts(0, TX^ltype) then
         call OPMUL^domain.restrict(0,TX^ltype);
         if OPMUL^domain.accepts(1,F^type) then
             call OPMUL^domain.restrict(0,F^type);
         else
             -- ERROR
+            generate := false;
             error(err_type, F^type.getName(), OPMUL^domain.getType(1));
         end
     else
         -- ERROR
+        generate := false;
             error(err_type, TX^ltype.getName(), OPMUL^domain.getType(1));
     end
 end
@@ -1093,6 +1479,22 @@ do
 end
 }
 
+-- Generation du code
+#gendown{
+do
+    if generate then
+        if TX^lcode.equals("") then
+            -- Erreur avant
+            TX1^lcode := "";
+        else
+            TX1^lcode := TX^generator.generateMultiplicationOperation(TX^lcode, F^code, OPMUL^code);
+        end
+    else
+        TX1^lcode := "";
+    end
+end
+}
+
 -- Remonte les attributs :
 --  * type
 #up{
@@ -1101,7 +1503,14 @@ do
 end
 }
 
-TX -> #up ;
+-- Generation du code
+#gen{
+do
+    TX^code := TX1^code;
+end
+}
+
+TX -> #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -1111,7 +1520,14 @@ do
 end
 }
 
-OPMUL -> mult #up ;
+-- Generation du code
+#gen{
+do
+    TX^code := TX^lcode;
+end
+}
+
+OPMUL -> mult #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1120,7 +1536,14 @@ do
 end
 }
 
-OPMUL -> div #up ;
+-- Generation du code
+#gen{
+do
+    OPMUL^code := OPMUL^generator.generateMult();
+end
+}
+
+OPMUL -> div #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1129,7 +1552,14 @@ do
 end
 }
 
-OPMUL -> mod #up ;
+-- Generation du code
+#gen{
+do
+    OPMUL^code := OPMUL^generator.generateDiv();
+end
+}
+
+OPMUL -> mod #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1138,7 +1568,14 @@ do
 end
 }
 
-OPMUL -> et #up ;
+-- Generation du code
+#gen{
+do
+    OPMUL^code := OPMUL^generator.generateMod();
+end
+}
+
+OPMUL -> et #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1147,8 +1584,15 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    OPMUL^code := OPMUL^generator.generateAnd();
+end
+}
+
 -- expressions de base
-F -> entier #up ;
+F -> entier #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -1158,7 +1602,14 @@ do
 end
 }
 
-F -> vrai #up ;
+-- Generation du code
+#gen{
+do
+    F^code := F^generator.generateInteger(entier^txt);
+end
+}
+
+F -> vrai #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -1168,18 +1619,32 @@ do
 end
 }
 
-F -> faux #up ;
+-- Generation du code
+#gen{
+do
+    F^code := F^generator.generateBoolean(true);
+end
+}
+
+F -> faux #up #gen ;
 
 -- Remonte les attributs :
 --  * type
 #up{
 do
     F^type := new DTYPE("Boolean", 1);
+end
+}
+
+-- Generation du code
+#gen{
+do
+    F^code := F^generator.generateBoolean(false);
 end
 }
 
 -- unaire
-F ->  OPUN F #checktype #up ;
+F ->  OPUN F #checktype #up #gen ;
 
 -- Verifie la compatibilite de ltype et de ES^type avec OPUN^domain
 #checktype{
@@ -1201,7 +1666,14 @@ do
 end
 }
 
-OPUN -> plus #up ;
+-- Generation du code
+#gen{
+do
+    F^code := F^generator.generateUnaryOperation(F1^code, OPUN^code);
+end
+}
+
+OPUN -> plus #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1210,7 +1682,14 @@ do
 end
 }
 
-OPUN -> moins #up ;
+-- Generation du code
+#gen{
+do
+    OPUN^code := OPUN^generator.generatePlus();
+end
+}
+
+OPUN -> moins #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1219,7 +1698,14 @@ do
 end
 }
 
-OPUN -> non #up ;
+-- Generation du code
+#gen{
+do
+    OPUN^code := OPUN^generator.generateMinus();
+end
+}
+
+OPUN -> non #up #gen ;
 
 -- Remonte le domaine
 #up{
@@ -1228,8 +1714,15 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    OPUN^code := OPUN^generator.generateNot();
+end
+}
+
 -- null
-F -> null #up ;
+F -> null #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -1239,7 +1732,14 @@ do
 end
 }
 
-F ->  paro E parf #up ;
+-- Generation du code
+#gen{
+do
+    F^code := F^generator.generateNull();
+end
+}
+
+F ->  paro E parf #up #gen ;
 
 -- Remonte les attributs :
 --  * type
@@ -1249,19 +1749,39 @@ do
 end
 }
 
+-- Generation du code
+#gen{
+do
+    F^code := E^code;
+end
+}
+
 -- new
-F -> nouveau TYPE paro ARGS parf #checksignature #up ;
+F -> nouveau TYPE paro ARGS parf #checksignature #up #gen ;
+
+global
+-- #checksignature #gen
+    clazz : Clazz;
+-- #checksignature #gen
+    constructors : MethodList;
+-- #gen
+    generate : BOOLEAN;
 
 -- Teste l'existence du constructeur
 #checksignature{
-local
-    clazz : Clazz;
-    constructors : MethodList;
 do
     match TYPE^type
         with Pointer then
             clazz := TYPE^type.getClazz();
             constructors := clazz.getConstructors();
+            if constructors.isEmpty() then
+                if ARGS^signature.equals(new Signature()) then
+                    -- OK
+                    -- TODO: Et si un constructeur est defini plus tard ?
+                else
+                    error(err_unknown_constructor, ARGS^signature.toString());
+                end
+            else
             if constructors.doAccept(ARGS^signature) then
                 -- OK
                     -- DISCUSS
@@ -1273,9 +1793,11 @@ do
                     --
                     -- maintenant on construit une classe C extend A implements B...
                     -- Et quel constructeur on prend pour Toto(c) avec c de classe C ???
+                generate := true;
             else
                 -- ERROR
                 error(err_unknown_constructor, ARGS^signature.toString());
+            end
             end
         else
             -- ERROR
@@ -1292,128 +1814,188 @@ do
 end
 }
 
-F ->  ident #down Q #up ;
-
--- Passe le type de gauche a Q
-#down{
-local
-    info : INFO;
-    attribut :DTYPE;
+-- Generation du code
+#gen{
 do
-   info := F^tds.chercherGlobalement(ident^txt);
-    if info = nil then
-         attribut := F^clazz.getAttribute(ident^txt);
-         if attribut = nil then
-         --Error
-            error(err_no_attribut, ident^txt);
-         else 
-            Q^ltype := attribut;
-         end
+    if generate then
+        F^code := F^generator.generateInstance(clazz, ARGS^signature);
     else
-        Q^ltype := info.getType();
+        F^code := "";
     end
-    Q^lclazz := F^clazz;
-    Q^lname := ident^txt;
 end
 }
 
--- Remonte les attributs :
---  * type
+F -> ident #down Q #up ;
+
+-- Descend les bon attribut pour Q
+#down{
+do
+    Q^lname := ident^txt;
+    Q^lclazz := F^clazz;
+-- Debut de l'horreur
+    Q^isFirst := true;
+-- Fin dans cette regle
+end
+}
+
+-- Remonte le type et le code
 #up{
 do
     F^type := Q^type;
+    F^code := Q^code;
 end
 }
 
 -- Q = qualificateur de variable
 Q -> #up ;
 
--- Remonte les attributs :
---  * type
+-- Remonte le type
 #up{
-do
-    Q^type := Q^ltype;
-end
-}
-
--- acces attribut
-Q ->  pt ident #down Q #up ;
-
--- Passe le type de gauche a Q
-#down{
 local
-    type : DTYPE;
-    clazz : Clazz;
+    info : INFO;
 do
-    match Q^ltype
-        with Pointer then
-            clazz := Q^ltype.getClazz();
-            Q1^lclazz := clazz;
-            Q1^ltype := clazz.getAttribute(ident^txt);
-            Q1^lname := ident^txt;
+    if Q^lclazz = nil then
+        Q^type := nil;
+        Q^code := "";
+    else
+        if Q^lname = nil then
+            Q^type := new Pointer(Q^lclazz);
+            Q^code := "";
         else
-            -- ERROR
-            error(err_primitive_types_have_no_fields);
+            Q^type := Q^lclazz.getAttribute(Q^lname);
+            Q^code := Q^generator.generateGetAttribute(Q^lname, Q^lclazz);
+-- Debut de l'horreur
+	        if Q^isFirst then
+	            info := Q^tds.chercherGlobalement(Q^lname);
+	            if info /= nil then
+	                Q^type := info.getType();
+                    Q^code := Q^generator.generateGetVariable(Q^lname);
+	            end
+	        end
+-- Fin de l'horreur (pour l'instant)
+	    end
     end
 end
 }
 
--- Remonte les attributs :
---  * type
+-- acces attribut
+Q -> #checkname pt ident #down Q #up ;
+
+global
+    clazz : Clazz; -- La classe de l'element precedent
+
+-- Recupere le type de l'element precedent et verifie qu'il n'est pas primitif
+#checkname{
+local
+    info : INFO;
+    type : DTYPE;
+do
+    type := Q^lclazz.getAttribute(Q^lname);
+-- Debut de l'horreur
+    if Q^isFirst then
+        info := Q^tds.chercherGlobalement(Q^lname);
+        if info /= nil then
+            type := info.getType();
+        end
+    end
+-- Fin de l'horreur (pour l'instant
+    if type /= nil then
+        match type
+            with Pointer then
+                clazz := type.getClazz();
+            else
+                clazz := nil;
+                error(err_primitive_types_have_no_fields);
+        end
+    else
+        error(no_such_field, Q^lname, Q^lclazz);
+    end
+end
+}
+
+-- Descend les bon attribut pour Q
+#down{
+do
+    Q1^lname := ident^txt;
+    Q1^lclazz := clazz;
+-- Debut de l'horreur
+    Q1^isFirst := false;
+-- Fin dans cette regle
+end
+}
+
+-- Remonte le type et le code
 #up{
 do
-   Q^type := Q1^type;
+    Q^type := Q1^type;
+    Q^code := Q1^code;
 end
 }
 
 -- arguments d'appel de methode
-Q ->  paro ARGS parf #down Q #up ;
+Q -> #checkmethname paro ARGS parf #checkmethsign #down Q #up #gen ;
 
--- Passe le type de gauche a Q
-#down{
-local
-    methodList : MethodList;
+global
+    method : MethodList;
+
+-- Verifie qu'on a un nom de methode (pas le Q de la meme regle) et qu'il represente une methode existante !
+#checkmethname{
 do
-    if Q^lclazz = nil then
-        -- ERROR
-        error(err_primitive_types_have_no_method);
+    if Q^lname = nil then
+        method := nil;
+        error(missing_function_call_name);
     else
-        methodList := Q^lclazz.getMethodList(Q^lname);
-        if methodList = nil then
-            -- ERROR
-            error(err_no_such_method, Q^lname, Q^lclazz.getName());
-        else
-            if methodList.doAccept(ARGS^signature) then
-                -- C'est ok
-            -- DISCUSS
-            -- On a un petit probleme en cas d'ambiguite. Je m'explique :
-            -- les methodes Toto(A a) et Toto(B b) sont definies.
-            --   - Aucune relation entre A et B
-            --   - A est une classe concrete
-            --   - B est une interface
-            --
-            -- maintenant on construit une classe C extend A implements B...
-            -- Et quel methode on prend pour Toto(c) avec c de classe C ???
-                Q1^ltype := methodList.getReturnType();
-                Q1^lclazz := nil;
-                Q1^lname := nil;
-            else
-                error(err_wrong_signature_call, Q^lname, ARGS^signature);
-            end
+        method := Q^lclazz.getMethodList(Q^lname);
+        if method = nil then
+            error(no_such_function, Q^lname, Q^lclazz);
         end
     end
 end
 }
 
--- Remonte les attributs :
---  * type
-#up{
+-- Verifie, s'il y a lieu, la signature de la methode
+#checkmethsign{
 do
-   Q^type := Q1^type;
+    if method /= nil then
+        if method.doAccept(ARGS^signature) then
+            -- OK
+        else
+            error(wrong_signature);
+        end
+    end
 end
 }
 
-ARGS -> E ARGSX #up ;
+-- Descend les bon attribut pour Q
+#down{
+do
+    Q1^lname := nil;
+    if method = nil then
+        Q1^lclazz := nil;
+    else
+        Q1^lclazz := method.getReturnType();
+    end
+-- Debut de l'horreur
+    Q1^isFirst := false;
+-- Fin dans cette regle
+end
+}
+
+-- Remonte le type et le code
+#up{
+do
+    Q^type := Q1^type;
+end
+}
+
+-- Remonte le type et le code
+#gen{
+do
+    Q^code := Q^generator.generateQualification(Q^generator.generateMethodCall(method, ARGS^code), Q1^code);
+end
+}
+
+ARGS -> E ARGSX #up #gen ;
 
 -- Remonte la signature
 #up{
@@ -1426,7 +2008,14 @@ do
 end
 }
 
-ARGS -> #up ;
+-- Generation de code
+#gen{
+do
+    ARGS^code := ARGS^generator.concatenateArgument(E^code, ARGSX^code);
+end
+}
+
+ARGS -> #up #gen ;
 
 -- Remonte la signature
 #up{
@@ -1435,7 +2024,14 @@ do
 end
 }
 
-ARGSX -> virg E ARGSX #up ;
+-- Generation de code
+#gen{
+do
+    ARGS^code := "";
+end
+}
+
+ARGSX -> virg E ARGSX #up #gen ;
 
 -- Remonte la signature
 #up{
@@ -1448,7 +2044,14 @@ do
 end
 }
 
-ARGSX -> #up ;
+-- Generation de code
+#gen{
+do
+    ARGSX^code := ARGSX^generator.concatenateArgument(E^code, ARGSX1^code);
+end
+}
+
+ARGSX -> #up #gen ;
 
 -- Remonte la signature
 #up{
@@ -1457,5 +2060,11 @@ do
 end
 }
 
+-- Generation de code
+#gen{
+do
+    ARGSX^code := "";
+end
+}
 
 end

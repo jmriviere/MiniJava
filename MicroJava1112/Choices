@@ -17,3 +17,19 @@ Nommage des Methodes & Il est interdit de nommer une methode classique du nom de
 \hline
 Retour d'affectations & une affectation retourne l'element affecte \\
 \hline
+
+
+TODO
+	Dans Clazz#addMethod -> Tester la validite du type de retour en plus
+	
+	
+DISCUSS
+
+Modifier la grammaire rendrai la gestion de la calification de variable beaucoup plus simple.
+
+les regles seraient
+F -> ident
+F -> ident pt ident Q
+F -> ident ( ARGS ) Q
+
+a la place de la seule regle F -> ident Q

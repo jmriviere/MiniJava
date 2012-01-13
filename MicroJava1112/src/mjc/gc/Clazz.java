@@ -83,7 +83,11 @@ public class Clazz extends DTYPE {
 	 * @return the attribute DTYPE, null if the attribute is undefined in this class
 	 */
 	public DTYPE getAttribute(String attrName) {
-		return attributes.get(attrName);
+		DTYPE ret = attributes.get(attrName);
+		if (ret==null&&extended!=null) {
+			ret = extended.getAttribute(attrName);
+		}
+		return ret;
 	}
 
 	/**

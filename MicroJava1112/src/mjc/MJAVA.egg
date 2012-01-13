@@ -21,7 +21,6 @@ syn type : DTYPE for TYPE, PARF, AFFX, E, ER, ERX, ES, ESX, T, TX, F, Q;
 inh ltype : DTYPE for ERX, ESX, TX;
 inh lname : STRING for Q;
 inh lclazz : Clazz for Q;
-inh isFirst : BOOLEAN for Q;
 
 -- La signature des methodes
 syn signature : Signature for PARFS, PARFSX, ARGS, ARGSX;
@@ -424,8 +423,12 @@ end
 -- Generation du code
 #gen{
 do
-    if MCORPS^sreturned = false then
-        error(err_method_must_return, ident^txt);
+    if DEF^clazz.isInterfaze()then
+    
+    else
+        if MCORPS^sreturned = false then
+            error(err_method_must_return, ident^txt);
+        end
     end
     if generate then
 --        call DEF^clazz.addMethodCode(DEF^generator.generateMethod(ident^txt, MCORPS^code));
@@ -843,6 +846,7 @@ do
             error(err_type, AFFX^type.getName(), TYPE^type.getName());
         end
     else
+        call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
     end
 end
 }
@@ -1012,13 +1016,13 @@ global
 do
     generate := true;
     if AFFX^type /= nil then
-    if AFFX^type.isType(ER^type) then
-        -- OK
-    else
-        -- ERROR
-        generate := false;
-        error(err_type, AFFX^type.getName(), ER^type.getName());
-    end
+		if AFFX^type.isType(ER^type) then
+		    -- OK
+		else
+		    -- ERROR
+		    generate := false;
+		    error(err_type, AFFX^type.getName(), ER^type);
+		end
     end
 end
 }
@@ -1158,7 +1162,7 @@ do
     if OPREL^domain.accepts(0, ERX^ltype) then
         call OPREL^domain.restrict(0,ERX^ltype);
         if OPREL^domain.accepts(1,ES^type) then
-            call OPREL^domain.restrict(0,ES^type);
+            call OPREL^domain.restrict(1,ES^type);
         else
             -- ERROR
             generate := false;
@@ -1322,7 +1326,7 @@ do
     else
         -- ERROR
         generate := false;
-        error(err_type, ESX^ltype.getName(), OPADD^domain.getType(1));
+        error(err_type, ESX^ltype.getName(), OPADD^domain.getType(0));
     end
 end
 }
@@ -1340,6 +1344,7 @@ do
     if generate then
         if ESX^lcode.equals("") then
             -- Erreur avant !
+            ESX1^lcode := "";
         else
             ESX1^lcode := ESX^generator.generateAdditionOperation(ESX^lcode, T^code, OPADD^code);
         end
@@ -1377,7 +1382,7 @@ end
 -- Generation du code
 #gen{
 do
-    ESX^code := "";
+    ESX^code := ESX^lcode;
 end
 }
 
@@ -1473,7 +1478,7 @@ do
     if OPMUL^domain.accepts(0, TX^ltype) then
         call OPMUL^domain.restrict(0,TX^ltype);
         if OPMUL^domain.accepts(1,F^type) then
-            call OPMUL^domain.restrict(0,F^type);
+            call OPMUL^domain.restrict(1,F^type);
         else
             -- ERROR
             generate := false;
@@ -1482,7 +1487,7 @@ do
     else
         -- ERROR
         generate := false;
-            error(err_type, TX^ltype.getName(), OPMUL^domain.getType(1));
+            error(err_type, TX^ltype.getName(), OPMUL^domain.getType(0));
     end
 end
 }
@@ -1840,16 +1845,57 @@ do
 end
 }
 
-F -> ident #down Q #up ;
+F -> ident #up ;
+
+-- Remonte le type et le code
+#up{
+local
+    type : DTYPE;
+    info : INFO;
+do
+    type := F^clazz.getAttribute(ident^txt);
+    F^code := F^generator.generateGetAttribute(ident^txt, F^clazz);
+    info := F^tds.chercherGlobalement(ident^txt);
+    if info /= nil then
+        type := info.getType();
+        F^code := F^generator.generateGetVariable(ident^txt);
+    end
+    F^type := type;
+    if type = nil then
+        F^code := "";
+        error(no_such_variable, ident^txt, F^clazz);
+    end
+end
+}
+
+F -> ident pt ident #down Q #up ;
 
 -- Descend les bon attribut pour Q
 #down{
+local
+    info : INFO;
+    type : DTYPE;
 do
-    Q^lname := ident^txt;
-    Q^lclazz := F^clazz;
--- Debut de l'horreur
-    Q^isFirst := true;
--- Fin dans cette regle
+    type := F^clazz.getAttribute(ident^txt);
+    info := F^tds.chercherGlobalement(ident^txt);
+    if info /= nil then
+        type := info.getType();
+    end
+    if type /= nil then
+        match type
+            with Pointer then
+                Q^lclazz := type.getClazz();
+                Q^lname := ident1^txt;
+            else
+                Q^lclazz := nil;
+                Q^lname := nil;
+                error(err_primitive_types_have_no_fields);
+        end
+    else
+        Q^lclazz := nil;
+        Q^lname := nil;
+        error(no_such_variable, ident^txt, F^clazz);
+    end
 end
 }
 
@@ -1861,6 +1907,53 @@ do
 end
 }
 
+F -> ident paro ARGS parf #down Q #up ;
+
+global
+    isPrimitif : BOOLEAN;
+    method : MethodList;
+
+-- Descend les bon attribut pour Q
+#down{
+local
+    type : DTYPE;
+do
+    Q^lname := nil;
+    method := F^clazz.getMethodList(ident^txt);
+    if method = nil then
+        Q^lclazz := nil;
+        error(no_such_function, ident^txt, F^clazz.getName());
+    else
+        if method.doAccept(ARGS^signature) then
+            -- OK
+            type := method.getReturnType();
+            match type
+                with Pointer then
+                    Q^lclazz := type.getClazz();
+                    isPrimitif := false;
+                else
+                    isPrimitif := true;
+                Q^lclazz := nil;
+            end
+        else
+            Q^lclazz := nil;
+            error(wrong_signature);
+        end
+    end
+end
+}
+
+-- Remonte le type et le code
+#up{
+do
+    F^type := Q^type;
+    if isPrimitif then
+        F^type := method.getReturnType();
+    end
+    F^code := Q^code;
+end
+}
+
 -- Q = qualificateur de variable
 Q -> #up ;
 
@@ -1868,26 +1961,22 @@ Q -> #up ;
 #up{
 local
     info : INFO;
+    type : DTYPE;
 do
     if Q^lclazz = nil then
         Q^type := nil;
         Q^code := "";
     else
         if Q^lname = nil then
-            Q^type := new Pointer(Q^lclazz);
+            type := new Pointer(Q^lclazz);
             Q^code := "";
         else
-            Q^type := Q^lclazz.getAttribute(Q^lname);
+            type := Q^lclazz.getAttribute(Q^lname);
             Q^code := Q^generator.generateGetAttribute(Q^lname, Q^lclazz);
--- Debut de l'horreur
-	        if Q^isFirst then
-	            info := Q^tds.chercherGlobalement(Q^lname);
-	            if info /= nil then
-	                Q^type := info.getType();
-                    Q^code := Q^generator.generateGetVariable(Q^lname);
-	            end
-	        end
--- Fin de l'horreur (pour l'instant)
+            Q^type := type;
+            if type = nil then
+                error(no_such_field, Q^lname, Q^lclazz.getName());
+            end
 	    end
     end
 end
@@ -1906,14 +1995,6 @@ local
     type : DTYPE;
 do
     type := Q^lclazz.getAttribute(Q^lname);
--- Debut de l'horreur
-    if Q^isFirst then
-        info := Q^tds.chercherGlobalement(Q^lname);
-        if info /= nil then
-            type := info.getType();
-        end
-    end
--- Fin de l'horreur (pour l'instant
     if type /= nil then
         match type
             with Pointer then
@@ -1923,7 +2004,8 @@ do
                 error(err_primitive_types_have_no_fields);
         end
     else
-        error(no_such_field, Q^lname, Q^lclazz);
+        clazz := nil;
+        error(no_such_field, Q^lname, Q^lclazz.getName());
     end
 end
 }
@@ -1933,9 +2015,6 @@ end
 do
     Q1^lname := ident^txt;
     Q1^lclazz := clazz;
--- Debut de l'horreur
-    Q1^isFirst := false;
--- Fin dans cette regle
 end
 }
 
@@ -1952,19 +2031,23 @@ Q -> #checkmethname paro ARGS parf #checkmethsign #down Q #up #gen ;
 
 global
     method : MethodList;
+    isPrimitive : BOOLEAN;
 
 -- Verifie qu'on a un nom de methode (pas le Q de la meme regle) et qu'il represente une methode existante !
 #checkmethname{
 do
-    if Q^lname = nil then
-        method := nil;
-        error(missing_function_call_name);
-    else
-        method := Q^lclazz.getMethodList(Q^lname);
-        if method = nil then
-            error(no_such_function, Q^lname, Q^lclazz);
-        end
-    end
+	if Q^lclazz /= nil then
+	     if Q^lname = nil then
+	            method := nil;
+	        error(missing_function_call_name);
+	    else
+	        method := Q^lclazz.getMethodList(Q^lname);
+	        if method = nil then
+	            error(no_such_function, Q^lname, Q^lclazz.getName());
+	        end
+	    end
+	end
+    -- Sinon on a une erreur avant ( theoriquement)
 end
 }
 
@@ -1994,21 +2077,24 @@ do
         match returnType
             with Clazz then
                 Q1^lclazz := returnType;
+                isPrimitive := false;
             else
+                isPrimitive := true;
                 Q1^lclazz := nil;
             end
     end
--- Debut de l'horreur
-    -- Pk cet attribut isFirst?
-    Q1^isFirst := false;
--- Fin dans cette regle
 end
 }
 
 -- Remonte le type et le code
 #up{
 do
-    Q^type := Q1^type;
+    if isPrimitive then
+        -- Si primitif, inqualifiable
+        Q^type := method.getReturnType();
+    else
+        Q^type := Q1^type;
+    end
 end
 }
 

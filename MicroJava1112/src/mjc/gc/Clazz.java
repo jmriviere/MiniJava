@@ -45,10 +45,13 @@ public class Clazz extends DTYPE {
 		constructors = new MethodList(name, null);
 	}
 	
+	public void addEtiquette(String name, String etiquette) {
+		methods.get(name).addEtiquette(etiquette);
+	}
+	
 	/**
 	 * Returns the name of the class
 	 */
-	
 	public String getName() {
 		return name;
 	}

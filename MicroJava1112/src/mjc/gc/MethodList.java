@@ -16,7 +16,10 @@ public class MethodList implements Cloneable {
 	
     // Liste des types de paramètres 
     private ArrayList<Signature> signatures;
-
+    
+    // Liste des étiquettes associées à chaque signature.
+    private ArrayList<String> etiquettes;
+    
     /**
      * Creates a MethodList
      * 
@@ -27,6 +30,7 @@ public class MethodList implements Cloneable {
     	this.name = name;
     	this.returnType = returnType;
     	signatures = new ArrayList<Signature>();
+    	etiquettes = new ArrayList<String>();
     }
     
 	/**
@@ -41,6 +45,10 @@ public class MethodList implements Cloneable {
 	 */
 	public DTYPE getReturnType() {
 		return returnType;
+	}
+	
+	public void addEtiquette(String etiquette) {
+		etiquettes.add(etiquette);
 	}
 	
     /**

@@ -40,7 +40,8 @@ inh generator : IGenerator for PROGRAMME, ENTITES, DEFCLASSE, DEFINTERFACE, CORP
                                 MCORPS, BLOC, INSTS, INST, SIX, E, AFFX, ER, ERX, ES, ESX, T,
                                 TX, F, Q, ARGSX, ARGS, OPREL, OPADD, OPMUL, OPUN;
 syn code : String for ARGS, ARGSX, Q, F, TX, T, ESX, ES, ERX, ER, AFFX, E, SIX, INSTS, INST,
-                        BLOC, MCORPS, DEFINTERFACE, DEFCLASSE, ENTITES, OPREL, OPADD, OPMUL, OPUN;
+                        BLOC, MCORPS, DEFINTERFACE, DEFCLASSE, ENTITES, OPREL, OPADD, OPMUL, OPUN, CORPS,
+                        DEFS, DEF;
 inh lcode : String for TX, ESX, ERX;
 
 -- les terminaux 
@@ -94,20 +95,22 @@ PROGRAMME -> #init ENTITES #gen;
 global
    machine : AbstractMachine;
    t : TDD;
+   generator : IGenerator;
 #init {
 local
 do
    machine := PROGRAMME^source.getMachine();
    t := new TDD();
+   generator := new TamGenerator();
    ENTITES^tdd := t;
-   ENTITES^generator := new MockGenerator();
+   ENTITES^generator := generator;
 end
 }
 
 #gen {
 local
 do
-    call machine.writeCode(PROGRAMME^source.getFileName(), ENTITES^code);
+    call machine.writeCode(PROGRAMME^source.getFileName(), generator.generateHeader() + ENTITES^code);
     write "table des classes \n" + t;
 end
 }
@@ -127,7 +130,7 @@ ENTITES -> DEFCLASSE ENTITES #gen ;
 -- Generation du code
 #gen{
 do
-    ENTITES^code := ENTITES^generator.concatenateEntities(DEFCLASSE^code, ENTITES1^code);
+    ENTITES^code := DEFCLASSE^code + ENTITES1^code;
 end
 }
 
@@ -136,7 +139,7 @@ ENTITES -> DEFINTERFACE ENTITES #gen ;
 -- Generation du code
 #gen{
 do
-    ENTITES^code := ENTITES^generator.concatenateEntities(DEFINTERFACE^code, ENTITES1^code);
+    ENTITES^code := DEFINTERFACE^code + ENTITES1^code;
 end
 }
 
@@ -197,7 +200,7 @@ end
 #gen{
 do
     if generate then
-        DEFCLASSE^code := DEFCLASSE^generator.generateClazz(clazz);
+        DEFCLASSE^code := CORPS^code;
     end
 end
 }
@@ -244,7 +247,7 @@ end
 #gen{
 do
     if generate then
-        DEFINTERFACE^code := DEFINTERFACE^generator.generateClazz(clazz);
+        DEFINTERFACE^code := CORPS^code;
     end
 end
 }
@@ -340,12 +343,27 @@ do
 end
 }
 
-CORPS -> aco DEFS acf ;
+CORPS -> aco DEFS #gen acf ;
+#gen {
+do
+    CORPS^code := DEFS^code;
+end
+}
 
 -- les attributs
-DEFS -> ;
+DEFS -> #gen;
+#gen {
+do
+    DEFS^code := "";
+end
+}
 
-DEFS -> DEF DEFS ;
+DEFS -> DEF DEFS #gen;
+#gen {
+do
+    DEFS^code := DEF^code + DEFS1^code;
+end
+}
 
 -- attribut
 DEF ->  TYPE ident pv #attr ;
@@ -361,6 +379,7 @@ do
         error(err_attribute_interface, DEF^clazz.getName());
     else
         call DEF^clazz.addAttribute(ident^txt, TYPE^type);
+        DEF^code := ""; -- Génération
     end
 end
 }
@@ -422,6 +441,8 @@ end
 
 -- Generation du code
 #gen{
+local
+    etiquette : String;
 do
     if DEF^clazz.isInterfaze()then
     
@@ -431,7 +452,9 @@ do
         end
     end
     if generate then
---        call DEF^clazz.addMethodCode(DEF^generator.generateMethod(ident^txt, MCORPS^code));
+        etiquette := DEF^generator.generateEtiquette();
+        call DEF^clazz.addEtiquette(ident^txt, etiquette);
+        DEF^code := DEF^generator.generateMethod(etiquette, MCORPS^code);
     end
 end
 }
@@ -493,13 +516,15 @@ end
 
 -- Generation du code
 #gen{
+    local etiquette : String;
 do
     if MCORPS^sreturned = true then
         error(err_proc_no_return, ident^txt);
     end
     if generate then
-        -- Il faut générer des étiquettes ... Utiliser juste ident^txt ça ne fonctionne pas en cas de surcharge
---        call DEF^clazz.addMethodCode(DEF^generator.generateMethod(ident^txt, MCORPS^code));
+        etiquette := DEF^generator.generateEtiquette();
+        call DEF^clazz.addEtiquette(ident^txt, etiquette);
+        DEF^code := DEF^generator.generateMethod(etiquette, MCORPS^code);
     end
 end
 }

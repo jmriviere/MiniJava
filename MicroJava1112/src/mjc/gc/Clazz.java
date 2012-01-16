@@ -45,8 +45,20 @@ public class Clazz extends DTYPE {
 		constructors = new MethodList(name, null);
 	}
 	
+	/**
+	 * Method addConstructor or addMethod must be called before this one can
+	 * be called.
+	 * @param name the name of the class
+	 * @param etiquette the etiquette associated to the signature
+	 * 
+	 */
 	public void addEtiquette(String name, String etiquette) {
-		methods.get(name).addEtiquette(etiquette);
+		if (methods.get(name) != null) {
+			methods.get(name).addEtiquette(etiquette);
+		}
+		else {
+			constructors.addEtiquette(etiquette);
+		}
 	}
 	
 	/**

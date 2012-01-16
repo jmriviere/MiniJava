@@ -200,7 +200,7 @@ end
 #gen{
 do
     if generate then
-        DEFCLASSE^code := CORPS^code;
+        DEFCLASSE^code := DEFCLASSE^generator.generateVtable(clazz) + CORPS^code;
     end
 end
 }
@@ -639,9 +639,11 @@ end
 
 -- Generation du code
 #gen{
+local
+    etiquette : String;
 do
     if generate then
---        call DEF^clazz.addConstructorCode(DEF^generator.generateConstructor(BLOC^code));
+        etiquette := DEF^generator.generateConstructor(BLOC^code);
     end
 end
 }

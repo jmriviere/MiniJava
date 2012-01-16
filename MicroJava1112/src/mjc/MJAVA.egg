@@ -42,6 +42,8 @@ inh generator : IGenerator for PROGRAMME, ENTITES, DEFCLASSE, DEFINTERFACE, CORP
 syn code : String for ARGS, ARGSX, Q, F, TX, T, ESX, ES, ERX, ER, AFFX, E, SIX, INSTS, INST,
                         BLOC, MCORPS, DEFINTERFACE, DEFCLASSE, ENTITES, OPREL, OPADD, OPMUL, OPUN, CORPS,
                         DEFS, DEF;
+--syn addr : Integer for INSTS, INST, BLOC, E;
+--inh laddr : Integer for INSTS, INST, BLOC;
 inh lcode : String for TX, ESX, ERX;
 
 -- les terminaux 
@@ -454,7 +456,7 @@ do
     if generate then
         etiquette := DEF^generator.generateEtiquette();
         call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateMethod(etiquette, MCORPS^code);
+        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, MCORPS^code);
     end
 end
 }
@@ -524,7 +526,7 @@ do
     if generate then
         etiquette := DEF^generator.generateEtiquette();
         call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateMethod(etiquette, MCORPS^code);
+        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, MCORPS^code);
     end
 end
 }
@@ -570,6 +572,7 @@ end
 #down{
 do
     BLOC^hreturned := false;
+--    BLOC^laddr := 0;
 end
 }
 
@@ -634,6 +637,7 @@ do
     BLOC^tds := tds;
     BLOC^hreturned := false;
     BLOC^returns := nil;
+--    BLOC^laddr := 0;
 end
 }
 
@@ -643,7 +647,9 @@ local
     etiquette : String;
 do
     if generate then
-        etiquette := DEF^generator.generateConstructor(BLOC^code);
+        etiquette := DEF^generator.generateEtiquette();
+        call DEF^clazz.addEtiquette(ident^txt, etiquette);
+        DEF^code := DEF^generator.generateConstructor(DEF^clazz, BLOC^code, etiquette);
     end
 end
 }
@@ -752,20 +758,26 @@ end
 }
 
 -- corps de methode et bloc d'instructions
-BLOC -> aco INSTS acf #up #gen ;
+BLOC -> aco #addr INSTS acf #up #gen ;
+#addr {
+do
+--    INSTS^laddr := BLOC^laddr;
+end
+}
 
 -- Remonte les attributs
 --  * sreturned
 #up{
 do
     BLOC^sreturned := INSTS^sreturned;
+--    BLOC^addr := INSTS^addr;
 end
 }
 
 -- Generation du code
 #gen{
 do
-    BLOC^code := BLOC^generator.generateBloc(INSTS^code);
+    BLOC^code := INSTS^code;
 end
 }
 
@@ -784,6 +796,7 @@ end
 #gen{
 do
     INSTS^code := "";
+--    INSTS^addr := INSTS^laddr;
 end
 }
 
@@ -824,7 +837,8 @@ end
 #gen{
 do
     if generate then
-        INSTS^code := INSTS^generator.generateSequence(INST^code, INSTS1^code);
+--        INSTS^addr := INST^addr + INSTS1^addr;
+        INSTS^code := INST^code + INSTS1^code;
     end
 end
 }
@@ -835,11 +849,6 @@ INST-> TYPE ident #check AFFX pv #checktype #up #gen ;
 global
     generate : BOOLEAN;
 
--- Teste l'absence de ident dans la tds
--- et dans la clazz.
--- TODO: Choisir si on accepte le hidding.
--- Manu: Etant donne qu'on a pas de mot clef this ou super, je pense qu'il vaut mieux le refuser
--- Jérémy: Oui effectivement, sans moyen de différenciation, on refuse :)
 #check{
 local
     info : INFO;
@@ -889,8 +898,9 @@ end
 -- Generation du code
 #gen{
 do
+--    INST^addr := TYPE^type.getTaille();
     if generate then
-        INST^code := INST^generator.generateAffectation(ident^txt, AFFX^code);
+        INST^code := INST^generator.generateAffectation(ident^txt, AFFX^code, TYPE^type.getTaille());
     end
 end
 }
@@ -909,6 +919,7 @@ end
 -- Generation du code
 #gen{
 do
+--    INST^addr := E^addr;
     INST^code := E^code;
 end
 }
@@ -934,6 +945,7 @@ end
 -- Generation du code
 #gen{
 do
+--    INST^addr := BLOC^addr;
     INST^code := BLOC^code;
 end
 }
@@ -1073,7 +1085,7 @@ do
         E^code := ER^code;
     else
         if generate then
-            E^code := E^generator.generateAffectation(ER^code, AFFX^code);
+            E^code := E^generator.generateAffectation(ER^code, AFFX^code, AFFX^type.getTaille());
         end
     end
 end
@@ -2148,7 +2160,7 @@ end
 -- Generation de code
 #gen{
 do
-    ARGS^code := ARGS^generator.concatenateArgument(E^code, ARGSX^code);
+    ARGS^code := E^code + ARGSX^code;
 end
 }
 
@@ -2184,7 +2196,7 @@ end
 -- Generation de code
 #gen{
 do
-    ARGSX^code := ARGSX^generator.concatenateArgument(E^code, ARGSX1^code);
+    ARGSX^code := E^code + ARGSX1^code;
 end
 }
 

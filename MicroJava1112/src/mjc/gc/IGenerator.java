@@ -2,13 +2,17 @@ package mjc.gc;
 
 public interface IGenerator {
 
+	String generateVtable(Clazz clazz);
+	
+	String generateEtiquette();
+	
 	String generateHeader();
 	
 	String generateBloc(String att_code);
 
 	String generateConstructor(Clazz construct, String att_code, String nomEtiquette);
 
-	String generateAffectation(String att_code, String att_code2);
+	String generateAffectation(String variable, String code, int dep);
 
 	String generateRelativeOperation(String att_lcode, String att_code,
 			String att_code2);
@@ -70,7 +74,7 @@ public interface IGenerator {
 	
 	String generateMethodCall(MethodList m_list, String m_name);
 	
-	String generateMethod(String etiquette, String code);
+	String generateMethod(Clazz clazz, String etiquette, String code);
 	
 	// TODO: mettre des noms de paramètres explicites
 	String generateQualification(String toto, String tata);

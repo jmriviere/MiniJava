@@ -23,13 +23,12 @@ public class TamGenerator implements IGenerator {
 		// TODO Auto-generated method stub
 		int taille;
 		taille = construct.getTaille();
-		return nomEtiquette +"\n" + "\t att_code \n" +"\t RETURN (2)"+ taille +"\n";
+		return ";Constructor for " + construct.getName() + "class\n" + nomEtiquette +"\n" + "\tatt_code\n" +"\tRETURN (2)"+ taille +"\n";
 	}
 
 	@Override
-	public String generateAffectation(String att_code, String att_code2) {
-		// TODO Auto-generated method stub
-		return "";
+	public String generateAffectation(String variable, String code, int dep) {
+		return "; Variable: " + variable + "\n\t" + "LOADI (" + dep + ")" + code + "\n";
 	}
 
 	@Override
@@ -216,8 +215,8 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateMethod(String etiquette, String code) {
-		return etiquette + "\n\t" + code;
+	public String generateMethod(Clazz clazz, String etiquette, String code) {
+		return ";Method from class " + clazz.getName() + "\n" + etiquette + "\n\t" + code;
 	}
 
 }

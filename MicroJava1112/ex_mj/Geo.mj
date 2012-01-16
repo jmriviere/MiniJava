@@ -73,22 +73,23 @@ class PointCol extends Point{
   
   }
 
-class Geo {
+class Geo implements Test {
   void main ( int args ) {
     Point p = new Point();
     Point p1 = new Point();
     PointCol pc = new PointCol();
     int l;
-    p.lol;
+    p.lol.tot;
     p1.init(6,2);
     pc.init(6,1);
     Point m ;
+    Pint m2 ;
     m = p.milieu(p1);
     Point m1 = null ;
+    m1.getx();
     m1 = p.milieu(pc);
     Point m2 ;
     m2 = pc.milieu(p);
-    Point m3 ;
     m3 = pc.milieu(pc);
     l = p.type();
     p = pc;

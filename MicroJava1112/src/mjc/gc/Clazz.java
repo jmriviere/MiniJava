@@ -60,7 +60,19 @@ public class Clazz extends DTYPE {
 			constructors.addEtiquette(etiquette);
 		}
 	}
-	
+
+	/* Renvoie la somme des tailles des attributes
+	 * @see mjc.gc.DTYPE#getTaille()
+	 */
+	public int getTaille(){
+		int t;
+		t = 0;
+			for ( DTYPE dt : this.attributes.values()) {
+				t = dt.getTaille()+t;				
+			}	
+		return t;	
+		
+	}
 	/**
 	 * Returns the name of the class
 	 */

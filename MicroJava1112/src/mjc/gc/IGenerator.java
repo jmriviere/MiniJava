@@ -6,7 +6,7 @@ public interface IGenerator {
 	
 	String generateBloc(String att_code);
 
-	Object generateConstructor(String att_code);
+	String generateConstructor(Clazz construct, String att_code, String nomEtiquette);
 
 	String generateAffectation(String att_code, String att_code2);
 

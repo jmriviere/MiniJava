@@ -13,11 +13,17 @@ public class TamGenerator implements IGenerator {
 		// TODO Auto-generated method stub
 		return "";
 	}
+	public String generateVtable(Clazz construct){
+		
+		return"";
+	}
 
 	@Override
-	public Object generateConstructor(String att_code) {
+	public String generateConstructor(Clazz construct, String att_code, String nomEtiquette){
 		// TODO Auto-generated method stub
-		return "";
+		int taille;
+		taille = construct.getTaille();
+		return nomEtiquette +"\n" + "\t att_code \n" +"\t RETURN (2)"+ taille +"\n";
 	}
 
 	@Override

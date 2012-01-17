@@ -26,10 +26,10 @@ public class TamGenerator implements IGenerator {
 	@Override
 	public String generateAffectation(String variable, String code, int dep) {
 		if (code.equals("")) {
-			return "; Variable :" + variable + " sans init \n\t" + "PUSH " + dep + "\n";
+			return "; Variable :" + variable + " sans init, taille = " + dep + "\n\t" + "PUSH " + dep + "\n";
 		}
 		else {
-			return "; Variable: " + variable + "avec init \n" + code;
+			return "; Variable: " + variable + " avec init, taille = " + dep + "\n" + code;
 		}
 	}
 
@@ -54,9 +54,8 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateBoolean(boolean b) {
-		// TODO Auto-generated method stub
-		return "";
+	public String generateBoolean(int b) {
+			return "I2B " + b + "\n";
 	}
 
 	@Override
@@ -90,93 +89,74 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateSequence(String att_code, String att_code2) {
-		// TODO Auto-generated method stub
-		return "";
-	}
-
-	@Override
 	public String generateMinus() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR ISub";
 	}
 
 	@Override
 	public String generateOr() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR BOr";
 	}
 
 	@Override
 	public String generatePlus() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR IAdd";
 	}
 
 	@Override
 	public String generateAnd() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR BAnd";
 	}
 
 	@Override
 	public String generateMult() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR IMul";
 	}
 
 	@Override
 	public String generateMod() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR IMod";
 	}
 
 	@Override
 	public String generateDiv() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR IDiv";
 	}
 
 	@Override
 	public String generateNEq() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR INeq";
 	}
 
 	@Override
 	public String generateEq() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR Ieq";
 	}
 
 	@Override
 	public String generateInfEq() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR ILeq\n";
 	}
 
 	@Override
 	public String generateSupEq() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR IGeq";
 	}
 
 	@Override
 	public String generateInf() {
 		// TODO Auto-generated method stub
-		return "";
+		return "SUBR ILss";
 	}
 
 	@Override
 	public String generateSup() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR IGss";
 	}
 
 	@Override
 	public String generateNot() {
-		// TODO Auto-generated method stub
-		return "";
+		return "SUBR BNeg";
 	}
 
 	@Override

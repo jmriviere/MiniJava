@@ -44,7 +44,6 @@ syn code : String for ARGS, ARGSX, Q, F, TX, T, ESX, ES, ERX, ER, AFFX, E, SIX, 
                         DEFS, DEF;
 syn addr : Integer for CORPS, DEF, DEFS, INSTS, INST;
 inh laddr : Integer for DEFCLASSE, DEFINTERFACE, DEF, DEFS, INSTS, INST, BLOC, SIX;
-inh lcode : String for TX, ESX, ERX;
 
 -- les terminaux 
 
@@ -932,6 +931,7 @@ end
 do
 --    INST^addr := TYPE^type.getTaille();
     if generate then
+        INST^addr := INST^laddr + TYPE^type.getTaille();
         INST^code := INST^generator.generateAffectation(ident^txt, AFFX^code, TYPE^type.getTaille());
     end
 end
@@ -1116,12 +1116,8 @@ end
 -- Generation du code
 #gen{
 do
-    if AFFX^code.equals("") then
-        E^code := ER^code;
-    else
-        if generate then
-            E^code := E^generator.generateAffectation(ER^code, AFFX^code, AFFX^type.getTaille());
-        end
+    if generate then
+        E^code := ER^code + AFFX^code;
     end
 end
 }
@@ -1162,19 +1158,12 @@ end
 }
 
 -- relation
-ER -> ES #down #gendown ERX #up #gen ;
+ER -> ES #down ERX #up #gen ;
 
 -- Passe le type de gauche a ERX
 #down{
 do
     ERX^ltype := ES^type;
-end
-}
-
--- Generation du code de gauche
-#gendown{
-do
-    ERX^lcode := ES^code;
 end
 }
 
@@ -1189,11 +1178,11 @@ end
 -- Generation du code
 #gen{
 do
-    ER^code := ERX^code;
+    ER^code := ES^code + ERX^code;
 end
 }
 
-ES ->  T #down #gendown ESX #up #gen ;
+ES ->  T #down ESX #up #gen ;
 
 -- Passe le type de gauche a ESX
 #down{
@@ -1202,12 +1191,6 @@ do
 end
 }
 
--- Generation du code
-#gendown{
-do
-    ESX^lcode := T^code;
-end
-}
 
 -- Remonte les attributs :
 --  * type
@@ -1220,7 +1203,7 @@ end
 -- Generation du code
 #gen{
 do
-    ES^code := ESX^code;
+    ES^code := ESX^code + T^code;
 end
 }
 
@@ -1261,7 +1244,7 @@ end
 -- Generation du code
 #gen{
 do
-    ERX^code := ERX^generator.generateRelativeOperation(ERX^lcode, ES^code, OPREL^code);
+    ERX^code := ES^code + OPREL^code;
 end
 }
 
@@ -1379,7 +1362,7 @@ end
 }
 
 -- addition, ...
-ESX -> OPADD T #checktype #down #gendown ESX #up #gen ;
+ESX -> OPADD T #checktype #down ESX #up #gen ;
 
 global
     generate : BOOLEAN;
@@ -1412,22 +1395,6 @@ do
 end
 }
 
--- Generation du code
-#gendown{
-do
-    if generate then
-        if ESX^lcode.equals("") then
-            -- Erreur avant !
-            ESX1^lcode := "";
-        else
-            ESX1^lcode := ESX^generator.generateAdditionOperation(ESX^lcode, T^code, OPADD^code);
-        end
-    else
-        ESX1^lcode := "";
-    end
-end
-}
-
 -- Remonte les attributs :
 --  * type
 #up{
@@ -1439,7 +1406,7 @@ end
 -- Generation du code
 #gen{
 do
-    ESX^code := ESX1^code;
+    ESX^code := ESX1^code + T^code + OPADD^code;
 end
 }
 
@@ -1456,7 +1423,7 @@ end
 -- Generation du code
 #gen{
 do
-    ESX^code := ESX^lcode;
+    ESX^code := "";
 end
 }
 
@@ -1508,19 +1475,12 @@ do
 end
 }
 
-T ->  F #down #gendown TX #up #gen ;
+T ->  F #down TX #up #gen ;
 
 -- Passe le type de gauche a ESX
 #down{
 do
     TX^ltype := F^type;
-end
-}
-
--- Generation du code
-#gendown{
-do
-    TX^lcode := F^code;
 end
 }
 
@@ -1535,12 +1495,12 @@ end
 -- Generation du code
 #gen{
 do
-    T^code := TX^code;
+    T^code := F^code + TX^code;
 end
 }
 
 -- multiplication, ...
-TX -> OPMUL F #checktype #down #gendown TX #up #gen ;
+TX -> OPMUL F #checktype #down TX #up #gen ;
 
 global
     generate : BOOLEAN;
@@ -1573,22 +1533,6 @@ do
 end
 }
 
--- Generation du code
-#gendown{
-do
-    if generate then
-        if TX^lcode.equals("") then
-            -- Erreur avant
-            TX1^lcode := "";
-        else
-            TX1^lcode := TX^generator.generateMultiplicationOperation(TX^lcode, F^code, OPMUL^code);
-        end
-    else
-        TX1^lcode := "";
-    end
-end
-}
-
 -- Remonte les attributs :
 --  * type
 #up{
@@ -1600,7 +1544,7 @@ end
 -- Generation du code
 #gen{
 do
-    TX^code := TX1^code;
+    TX^code := TX1^code + F^code + OPMUL^code;
 end
 }
 
@@ -1617,7 +1561,7 @@ end
 -- Generation du code
 #gen{
 do
-    TX^code := TX^lcode;
+    TX^code := "";
 end
 }
 
@@ -1716,7 +1660,7 @@ end
 -- Generation du code
 #gen{
 do
-    F^code := F^generator.generateCst("1");
+    F^code := F^generator.generateBoolean(1);
 end
 }
 
@@ -1733,7 +1677,7 @@ end
 -- Generation du code
 #gen{
 do
-    F^code := F^generator.generateCst("1");
+    F^code := F^generator.generateBoolean(0);
 end
 }
 

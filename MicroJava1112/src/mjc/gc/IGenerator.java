@@ -22,7 +22,7 @@ public interface IGenerator {
 
 	String generateUnaryOperation(String att_code, String att_code2);
 
-	String generateBoolean(boolean b);
+	String generateBoolean(int b);
 
 	String generateCst(String variable);
 
@@ -34,8 +34,6 @@ public interface IGenerator {
 
 	String generateIfThenElse(String att_code, String att_code2,
 			String att_code3);
-
-	String generateSequence(String att_code, String att_code2);
 
 	String generateMinus();
 

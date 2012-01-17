@@ -6,16 +6,23 @@ package mjc.gc;
 public class INFO {
 	// le type
 	protected DTYPE type;
+	
+	private int dep;
 
 	public DTYPE getType() {
 		return type;
 	}
 
 	// constructeur
-	public INFO(DTYPE t) {
+	public INFO(DTYPE t, int dep) {
 		type = t;
+		this.dep = dep;
 	}
 
+	public int getDep() {
+		return dep;
+	}
+	
 	//
 	// affichage
 	public String toString() {

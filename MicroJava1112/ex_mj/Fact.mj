@@ -6,16 +6,11 @@ int g;
       return 1; 
       }
     else {
-      return n * 
-      	fact(
-      		n
-      		-
-      		1
-      		);
+      return n * fact(n -1);
       }
     }
 
   void main(int arg) {
-    int x = fact(6);
+    int x = L;
   }
 }

@@ -792,7 +792,7 @@ end
 BLOC -> aco #addr INSTS acf #up #gen ;
 #addr {
 do
---    INSTS^laddr := BLOC^laddr;
+    INSTS^laddr := BLOC^laddr;
 end
 }
 
@@ -801,7 +801,6 @@ end
 #up{
 do
     BLOC^sreturned := INSTS^sreturned;
---    BLOC^addr := INSTS^addr;
 end
 }
 
@@ -1700,7 +1699,7 @@ end
 -- Generation du code
 #gen{
 do
-    F^code := F^generator.generateInteger(entier^txt);
+    F^code := F^generator.generateCst(entier^txt);
 end
 }
 
@@ -1717,7 +1716,7 @@ end
 -- Generation du code
 #gen{
 do
-    F^code := F^generator.generateBoolean(true);
+    F^code := F^generator.generateCst("1");
 end
 }
 
@@ -1734,7 +1733,7 @@ end
 -- Generation du code
 #gen{
 do
-    F^code := F^generator.generateBoolean(false);
+    F^code := F^generator.generateCst("1");
 end
 }
 

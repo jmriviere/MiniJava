@@ -24,7 +24,7 @@ public interface IGenerator {
 
 	String generateBoolean(boolean b);
 
-	String generateInteger(String att_txt);
+	String generateCst(String variable);
 
 	String generateNull();
 

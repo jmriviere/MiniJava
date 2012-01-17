@@ -25,7 +25,12 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateAffectation(String variable, String code, int dep) {
-		return "; Variable: " + variable + "\n\t" + "LOADI (" + dep + ")" + code + "\n";
+		if (code.equals("")) {
+			return "; Variable :" + variable + " sans init \n\t" + "PUSH " + dep + "\n";
+		}
+		else {
+			return "; Variable: " + variable + "avec init \n" + code;
+		}
 	}
 
 	@Override
@@ -55,9 +60,8 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateInteger(String att_txt) {
-		// TODO Auto-generated method stub
-		return "";
+	public String generateCst(String val) {
+		return "\tLOADL " + val + "\n";
 	}
 
 	@Override
@@ -208,7 +212,7 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateHeader() {
-		return "\tCALL main \n\tHALT\n";
+		return "CALL main \nHALT\n";
 	}
 
 	@Override

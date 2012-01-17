@@ -42,8 +42,8 @@ inh generator : IGenerator for PROGRAMME, ENTITES, DEFCLASSE, DEFINTERFACE, CORP
 syn code : String for ARGS, ARGSX, Q, F, TX, T, ESX, ES, ERX, ER, AFFX, E, SIX, INSTS, INST,
                         BLOC, MCORPS, DEFINTERFACE, DEFCLASSE, ENTITES, OPREL, OPADD, OPMUL, OPUN, CORPS,
                         DEFS, DEF;
---syn addr : Integer for INSTS, INST, BLOC, E;
---inh laddr : Integer for INSTS, INST, BLOC;
+syn addr : Integer for CORPS, DEF, DEFS, INSTS, INST;
+inh laddr : Integer for DEFCLASSE, DEFINTERFACE, DEF, DEFS, INSTS, INST, BLOC, SIX;
 inh lcode : String for TX, ESX, ERX;
 
 -- les terminaux 
@@ -127,7 +127,12 @@ do
 end
 }
 
-ENTITES -> DEFCLASSE ENTITES #gen ;
+ENTITES -> #addr DEFCLASSE ENTITES #gen ;
+#addr {
+do
+    DEFCLASSE^laddr := 0;
+end
+}
 
 -- Generation du code
 #gen{
@@ -136,7 +141,13 @@ do
 end
 }
 
-ENTITES -> DEFINTERFACE ENTITES #gen ;
+ENTITES -> #addr DEFINTERFACE ENTITES #gen ;
+
+#addr {
+do
+    DEFINTERFACE^laddr := 0;
+end
+}
 
 -- Generation du code
 #gen{
@@ -345,10 +356,17 @@ do
 end
 }
 
-CORPS -> aco DEFS #gen acf ;
+CORPS -> aco #addr DEFS #gen acf ;
+#addr {
+do
+    DEFS^laddr := 0;
+end
+}
+
 #gen {
 do
     CORPS^code := DEFS^code;
+    CORPS^addr := DEFS^addr;
 end
 }
 
@@ -357,12 +375,20 @@ DEFS -> #gen;
 #gen {
 do
     DEFS^code := "";
+    DEFS^addr := DEFS^laddr;
 end
 }
 
-DEFS -> DEF DEFS #gen;
+DEFS -> DEF #addr DEFS #gen;
+#addr {
+do
+    DEFS1^laddr := DEF^addr;
+end
+}
+
 #gen {
 do
+    DEFS^addr := DEFS1^addr;
     DEFS^code := DEF^code + DEFS1^code;
 end
 }
@@ -381,7 +407,8 @@ do
         error(err_attribute_interface, DEF^clazz.getName());
     else
         call DEF^clazz.addAttribute(ident^txt, TYPE^type);
-        DEF^code := ""; -- Génération
+        DEF^addr := DEF^laddr + TYPE^type.getTaille();
+        DEF^code := ""; -- Génération (Rien à faire, puisque que l'objet n'est pas encore instancié.
     end
 end
 }
@@ -438,6 +465,7 @@ do
     MCORPS^tds := tds;
     MCORPS^returns := TYPE^type;
     MCORPS^hreturned := false;
+    DEF^addr := DEF^laddr;
 end
 }
 
@@ -456,7 +484,7 @@ do
     if generate then
         etiquette := DEF^generator.generateEtiquette();
         call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, MCORPS^code);
+        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code;
     end
 end
 }
@@ -513,6 +541,7 @@ do
     MCORPS^tds := tds;
     MCORPS^returns := nil;
     MCORPS^hreturned := false;
+    DEF^addr := DEF^laddr;
 end
 }
 
@@ -526,7 +555,7 @@ do
     if generate then
         etiquette := DEF^generator.generateEtiquette();
         call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, MCORPS^code);
+        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code;
     end
 end
 }
@@ -572,7 +601,7 @@ end
 #down{
 do
     BLOC^hreturned := false;
---    BLOC^laddr := 0;
+    BLOC^laddr := 0;
 end
 }
 
@@ -637,7 +666,7 @@ do
     BLOC^tds := tds;
     BLOC^hreturned := false;
     BLOC^returns := nil;
---    BLOC^laddr := 0;
+    BLOC^laddr := 0;
 end
 }
 
@@ -646,10 +675,12 @@ end
 local
     etiquette : String;
 do
+    DEF^addr := DEF^laddr;
     if generate then
         etiquette := DEF^generator.generateEtiquette();
         call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateConstructor(DEF^clazz, BLOC^code, etiquette);
+        DEF^code := DEF^generator.generateConstructor(DEF^clazz, etiquette) + BLOC^code;
+        -- Manque le return 
     end
 end
 }
@@ -796,7 +827,7 @@ end
 #gen{
 do
     INSTS^code := "";
---    INSTS^addr := INSTS^laddr;
+    INSTS^addr := INSTS^laddr;
 end
 }
 
@@ -821,6 +852,7 @@ end
 --  * sreturned
 #transmit{
 do
+    INSTS1^laddr := INST^addr;
     INSTS1^hreturned := INST^sreturned;
 end
 }
@@ -837,7 +869,7 @@ end
 #gen{
 do
     if generate then
---        INSTS^addr := INST^addr + INSTS1^addr;
+        INSTS^addr := INST^addr;
         INSTS^code := INST^code + INSTS1^code;
     end
 end
@@ -882,6 +914,7 @@ do
             error(err_type, AFFX^type.getName(), TYPE^type.getName());
         end
     else
+        INST^addr := INST^laddr + TYPE^type.getTaille();
         call INST^tds.inserer(ident^txt, new INFO(TYPE^type));
     end
 end
@@ -919,7 +952,7 @@ end
 -- Generation du code
 #gen{
 do
---    INST^addr := E^addr;
+    INST^addr := INST^laddr;
     INST^code := E^code;
 end
 }
@@ -938,6 +971,7 @@ end
 --  * sreturned
 #up{
 do
+    INST^addr := INST^laddr;
     INST^sreturned := BLOC^sreturned;
 end
 }
@@ -971,6 +1005,7 @@ end
 -- Generation du code
 #gen{
 do
+    INST^addr := INST^laddr;
     INST^code := INST^generator.generateIfThenElse(E^code, BLOC^code, SIX^code);
 end
 }
@@ -1039,6 +1074,7 @@ end
 #gen{
 do
     if generate then
+        INST^addr := INST^laddr;
         INST^code := INST^generator.generateReturn(E^code);
     end
 end

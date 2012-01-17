@@ -10,7 +10,7 @@ public interface IGenerator {
 	
 	String generateBloc(String att_code);
 
-	String generateConstructor(Clazz construct, String att_code, String nomEtiquette);
+	String generateConstructor(Clazz construct, String etiquette);
 
 	String generateAffectation(String variable, String code, int dep);
 
@@ -74,7 +74,7 @@ public interface IGenerator {
 	
 	String generateMethodCall(MethodList m_list, String m_name);
 	
-	String generateMethod(Clazz clazz, String etiquette, String code);
+	String generateMethod(Clazz clazz, String etiquette, String name);
 	
 	// TODO: mettre des noms de paramètres explicites
 	String generateQualification(String toto, String tata);

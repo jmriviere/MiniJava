@@ -19,11 +19,8 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateConstructor(Clazz construct, String att_code, String nomEtiquette){
-		// TODO Auto-generated method stub
-		int taille;
-		taille = construct.getTaille();
-		return ";Constructor for " + construct.getName() + "class\n" + nomEtiquette +"\n" + "\tatt_code\n" +"\tRETURN (2)"+ taille +"\n";
+	public String generateConstructor(Clazz construct, String etiquette){
+		return ";Constructor for " + construct.getName() + " class\n" + etiquette +"\n";
 	}
 
 	@Override
@@ -215,8 +212,8 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateMethod(Clazz clazz, String etiquette, String code) {
-		return ";Method from class " + clazz.getName() + "\n" + etiquette + "\n\t" + code;
+	public String generateMethod(Clazz clazz, String etiquette, String name) {
+		return ";Method " + name +" from class " + clazz.getName() + "\n" + etiquette + "\n";
 	}
 
 }

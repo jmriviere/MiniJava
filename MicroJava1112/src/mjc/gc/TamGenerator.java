@@ -7,6 +7,7 @@ public class TamGenerator implements IGenerator {
 	// Ce compteur indique le nombre de méthodes main définies et doit être <= 1
 	public static int cptr_main = 0;
 	
+	@Override
 	public String generateEtiquette() {
 		return "x" + cptr++ + "\n\t";
 	}
@@ -79,10 +80,9 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateIfThenElse(String att_code, String att_code2,
-			String att_code3) {
-		// TODO Auto-generated method stub
-		return "";
+	public String generateIfThenElse(String codeCond, String codeTrue, String codeFalse) {
+		int nbIfThenElse = cptr++;
+		return "; Début if n° " + nbIfThenElse + "\n" + codeCond + "\tJUMPIF(0) else" + nbIfThenElse + "\n" + codeTrue + "\n\tJUMP finsi" + nbIfThenElse + "\nelse" + nbIfThenElse + codeFalse + "finsi" + nbIfThenElse ;
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateHeader() {
-		return "CALL (LB) main \nHALT\n\n";
+		return "CALL (SB) main \nHALT\n\n";
 	}
 
 	@Override

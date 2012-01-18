@@ -1082,8 +1082,7 @@ end
 do
     if generate then
         INST^addr := INST^laddr;
-        -- TODO: Mettre les bonnes valeurs de nombre d'arguments/taille mémoire retour.
-        INST^code := E^code + INST^generator.generateReturn(0, 0);
+        INST^code := E^code + INST^generator.generateReturn(INST^returns.getTaille(), E^type.getTaille());
     end
 end
 }
@@ -1908,10 +1907,11 @@ end
 
 F -> ident pt ident #down Q #up ;
 
+global info : INFO;
+
 -- Descend les bon attribut pour Q
 #down{
 local
-    info : INFO;
     type : DTYPE;
 do
     type := F^clazz.getAttribute(ident^txt);
@@ -1941,7 +1941,7 @@ end
 #up{
 do
     F^type := Q^type;
-    F^code := Q^code;
+    F^code := F^generator.generateReadStack(info) + Q^code;
 end
 }
 

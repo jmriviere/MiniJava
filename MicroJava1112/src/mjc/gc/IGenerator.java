@@ -30,8 +30,7 @@ public interface IGenerator {
 
 	String generateInstance(Clazz glob_72_clazz, Signature att_signature);
 
-	String generateIfThenElse(String att_code, String att_code2,
-			String att_code3);
+	String generateIfThenElse(String codeCond, String codeTrue, String codeFalse);
 
 	String generateMinus();
 

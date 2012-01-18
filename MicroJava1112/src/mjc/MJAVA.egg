@@ -478,7 +478,7 @@ do
     -- TODO: Générer une erreur si on trouve une fonction main (main ne peut pas retourner de valeur)
         etiquette := DEF^generator.generateEtiquette();
         call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code;
+        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code + DEF^generator.generateReturn(0,TYPE^type.getTaille());
     end
 end
 }
@@ -551,7 +551,7 @@ do
         if generate then
             etiquette := DEF^generator.generateEtiquette();
             call DEF^clazz.addEtiquette(ident^txt, etiquette);
-            DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code;
+            DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code + DEF^generator.generateReturn(0, 0);
         end
     else
         if DEF^generator.canCreateMain() then
@@ -946,7 +946,7 @@ end
 }
 
 -- instruction expression
-INST ->  E pv #up #gen ;
+INST -> E pv #up #gen ;
 
 -- Remonte les attributs
 --  * sreturned
@@ -1070,6 +1070,7 @@ global
 do
     INST^sreturned := true;
     if E^type.isType(INST^returns) then
+        generate := true;
     else
         generate := false;
         error(err_return_type, E^type.getName(), INST^returns.getName());
@@ -1082,7 +1083,7 @@ end
 do
     if generate then
         INST^addr := INST^laddr;
-        INST^code := E^code + INST^generator.generateReturn(INST^returns.getTaille(), E^type.getTaille());
+        INST^code := E^code;
     end
 end
 }
@@ -2179,7 +2180,11 @@ do
 end
 }
 
-ARGSX -> virg E ARGSX #up #gen ;
+ARGSX -> virg #genWrite E ARGSX #up #gen ;
+#genWrite {
+do
+end    
+}
 
 -- Remonte la signature
 #up{

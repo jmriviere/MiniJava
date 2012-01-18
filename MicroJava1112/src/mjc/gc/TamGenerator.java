@@ -59,7 +59,7 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateBoolean(int b) {
-			return "\tLOADL " + b + "\n\t\tSUBR I2B" +"\n";
+			return "\tLOADL " + b + "\n\tSUBR I2B" +"\n";
 	}
 
 	@Override
@@ -69,8 +69,7 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateNull() {
-		// TODO Auto-generated method stub
-		return "";
+		return "troplol";
 	}
 
 	@Override
@@ -82,7 +81,7 @@ public class TamGenerator implements IGenerator {
 	@Override
 	public String generateIfThenElse(String codeCond, String codeTrue, String codeFalse) {
 		int nbIfThenElse = cptr++;
-		return "; Début if n° " + nbIfThenElse + "\n" + codeCond + "\tJUMPIF(0) else" + nbIfThenElse + "\n" + codeTrue + "\n\tJUMP finsi" + nbIfThenElse + "\nelse" + nbIfThenElse + codeFalse + "finsi" + nbIfThenElse ;
+		return "; Début if n° " + nbIfThenElse + "\n" + codeCond + "\tJUMPIF(0) else" + nbIfThenElse + "\n" + codeTrue + "\tJUMP finsi" + nbIfThenElse + "\nelse" + nbIfThenElse + "\n" + codeFalse + "finsi" + nbIfThenElse + "\n" ;
 	}
 
 	@Override
@@ -177,28 +176,27 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateQualification(String toto, String tata) {
-		// TODO Auto-generated method stub
 		return "";
 	}
 
 	@Override
 	public String generateHeader() {
-		return "CALL (SB) main \nHALT\n\n";
+		return "CALL (LB) main \nHALT\n\n";
 	}
 
 	@Override
 	public String generateMethod(Clazz clazz, String etiquette, String name) {
-		return ";Method " + name +" from class " + clazz.getName() + "\n" + etiquette + "\n";
+		return ";Method " + name +" from class " + clazz.getName() + "\n" + etiquette;
 	}
 
 	@Override
 	public String generateWriteStack(INFO i) {
-		return "\tSTORE (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[SB]\n";
+		return "\tSTORE (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[LB]\n";
 	}
 	
 	@Override
 	public String generateReadStack(INFO i) {
-		return "\tLOAD (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[SB]\n";
+		return "\tLOAD (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[LB]\n";
 	}
 	
 	@Override

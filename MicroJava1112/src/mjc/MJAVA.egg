@@ -47,6 +47,9 @@ syn code : String for ARGS, ARGSX, Q, F, TX, T, ESX, ES, ERX, ER, AFFX, E, SIX, 
 syn addr : Integer for DEF, DEFS, INSTS, INST;
 inh laddr : Integer for DEF, DEFS, INSTS, INST, BLOC, SIX;
 
+-- Détermine si l'évaluation d'une expression doit engendrer une lecture ou une écriture mémoire
+inh genWrite : BOOLEAN for AFFX, ER, ES, T, F, ERX, ESX, TX;
+
 -- les terminaux 
 
 space separateur is  "[\r\n\t ]+";     
@@ -899,6 +902,8 @@ do
             generate := true;
         end
     end
+    -- Ici, on se trouve à droite de l'expression, donc on va générer une lecture en mémoire
+    AFFX^genWrite := false;
 end
 }
 
@@ -1084,10 +1089,17 @@ end
 }
 
 -- les expressions
-E -> ER AFFX #checktype #up #gen ;
+E -> #genWrite ER AFFX #checktype #up #gen ;
 
 global
     generate : BOOLEAN;
+
+#genWrite {
+do
+    ER^genWrite := true;
+    AFFX^genWrite := false;
+end
+}
 
 -- Teste la compatibilite des types
 #checktype{
@@ -1880,7 +1892,11 @@ do
     info := F^tds.chercherGlobalement(ident^txt);
     if info /= nil then
         type := info.getType();
-        F^code := F^generator.generateWriteStack(info);
+        if F^genWrite then
+            F^code := F^generator.generateWriteStack(info);
+        else
+            F^code := F^generator.generateReadStack(info);
+        end
     end
     F^type := type;
     if type = nil then

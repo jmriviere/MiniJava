@@ -4,6 +4,9 @@ public class TamGenerator implements IGenerator {
 
 	private static int cptr = 0;
 	
+	// Ce compteur indique le nombre de méthodes main définies et doit être <= 1
+	public static int cptr_main = 0;
+	
 	public String generateEtiquette() {
 		return "x" + cptr++ + "\n\t";
 	}
@@ -55,7 +58,7 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateBoolean(int b) {
-			return "I2B " + b + "\n";
+			return "\tLOADL " + b + "\n\t\tSUBR I2B" +"\n";
 	}
 
 	@Override
@@ -76,12 +79,6 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateReturn(String att_code) {
-		// TODO Auto-generated method stub
-		return "";
-	}
-
-	@Override
 	public String generateIfThenElse(String att_code, String att_code2,
 			String att_code3) {
 		// TODO Auto-generated method stub
@@ -90,73 +87,73 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateMinus() {
-		return "SUBR ISub";
+		return "\tSUBR ISub\n";
 	}
 
 	@Override
 	public String generateOr() {
-		return "SUBR BOr";
+		return "\tSUBR BOr\n";
 	}
 
 	@Override
 	public String generatePlus() {
-		return "SUBR IAdd";
+		return "\tSUBR IAdd\n";
 	}
 
 	@Override
 	public String generateAnd() {
-		return "SUBR BAnd";
+		return "\tSUBR BAnd\n";
 	}
 
 	@Override
 	public String generateMult() {
-		return "SUBR IMul";
+		return "\tSUBR IMul\n";
 	}
 
 	@Override
 	public String generateMod() {
-		return "SUBR IMod";
+		return "\tSUBR IMod\n";
 	}
 
 	@Override
 	public String generateDiv() {
-		return "SUBR IDiv";
+		return "\tSUBR IDiv\n";
 	}
 
 	@Override
 	public String generateNEq() {
-		return "SUBR INeq";
+		return "\tSUBR INeq\n";
 	}
 
 	@Override
 	public String generateEq() {
-		return "SUBR Ieq";
+		return "\tSUBR Ieq\n";
 	}
 
 	@Override
 	public String generateInfEq() {
-		return "SUBR ILeq\n";
+		return "\tSUBR ILeq\n";
 	}
 
 	@Override
 	public String generateSupEq() {
-		return "SUBR IGeq";
+		return "\tSUBR IGeq\n";
 	}
 
 	@Override
 	public String generateInf() {
 		// TODO Auto-generated method stub
-		return "SUBR ILss";
+		return "\tSUBR ILss\n";
 	}
 
 	@Override
 	public String generateSup() {
-		return "SUBR IGss";
+		return "\tSUBR IGss\n";
 	}
 
 	@Override
 	public String generateNot() {
-		return "SUBR BNeg";
+		return "\tSUBR BNeg\n";
 	}
 
 	@Override
@@ -168,12 +165,6 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateGetAttribute(String attr_name, Clazz clazz) {
-		// TODO Auto-generated method stub
-		return "";
-	}
-
-	@Override
-	public String generateGetVariable(String name) {
 		// TODO Auto-generated method stub
 		return "";
 	}
@@ -192,12 +183,42 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateHeader() {
-		return "CALL main \nHALT\n";
+		return "CALL (LB) main \nHALT\n\n";
 	}
 
 	@Override
 	public String generateMethod(Clazz clazz, String etiquette, String name) {
 		return ";Method " + name +" from class " + clazz.getName() + "\n" + etiquette + "\n";
+	}
+
+	@Override
+	public String generateWriteStack(INFO i) {
+		return "\tSTORE (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[SB]\n";
+	}
+	
+	@Override
+	public String generateReadStack(INFO i) {
+		return "\tLOAD (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[SB]\n";
+	}
+	
+	@Override
+	public String generateMain() {
+		if (cptr_main++ <= 1) {
+			return "main\n";
+		}
+		else {
+			return "";
+		}
+	}
+	
+	@Override
+	public String generateReturn(int nb_args, int nb_mots_retour) {
+		return "\tRETURN (" + nb_args + ") " + nb_mots_retour + "\n";
+	}
+	
+	@Override
+	public boolean canCreateMain() {
+		return cptr_main < 1;
 	}
 
 }

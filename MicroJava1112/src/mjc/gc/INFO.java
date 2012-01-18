@@ -7,7 +7,8 @@ public class INFO {
 	// le type
 	protected DTYPE type;
 	
-	private int dep;
+	// Le déplacement courant
+	protected int dep;
 
 	public DTYPE getType() {
 		return type;
@@ -18,7 +19,7 @@ public class INFO {
 		type = t;
 		this.dep = dep;
 	}
-
+	
 	public int getDep() {
 		return dep;
 	}

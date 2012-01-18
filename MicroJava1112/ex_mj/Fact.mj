@@ -11,6 +11,6 @@ int g;
     }
 
   void main(int arg) {
-    int x = L;
+    int x = fact(6);
   }
 }

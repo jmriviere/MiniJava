@@ -30,8 +30,6 @@ public interface IGenerator {
 
 	String generateInstance(Clazz glob_72_clazz, Signature att_signature);
 
-	String generateReturn(String att_code);
-
 	String generateIfThenElse(String att_code, String att_code2,
 			String att_code3);
 
@@ -68,11 +66,19 @@ public interface IGenerator {
 
 	String generateGetAttribute(String attr_name, Clazz clazz);
 	
-	String generateGetVariable(String name);
+	String generateWriteStack(INFO i);
+	
+	String generateReadStack(INFO i);
 	
 	String generateMethodCall(MethodList m_list, String m_name);
 	
 	String generateMethod(Clazz clazz, String etiquette, String name);
+	
+	String generateMain();
+	
+	String generateReturn(int nb_args, int nb_mots_retour);
+	
+	boolean canCreateMain();
 	
 	// TODO: mettre des noms de paramètres explicites
 	String generateQualification(String toto, String tata);

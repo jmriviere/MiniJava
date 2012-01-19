@@ -19,7 +19,7 @@ public class TamGenerator implements IGenerator {
 	}
 	public String generateVtable(Clazz construct){
 		
-		return"";
+		return "";
 	}
 
 	@Override
@@ -69,13 +69,12 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateNull() {
-		return "troplol";
+		return "\tLOADL -1\n\tLOADL -1\n";
 	}
 
 	@Override
-	public String generateInstance(Clazz glob_72_clazz, Signature att_signature) {
-		// TODO Auto-generated method stub
-		return "";
+	public String generateInstance(Clazz clazz, Signature signature, String codeArgs) {
+		return "\tLOADL " + clazz.getTaille() + "\n\tSUBR Malloc\n";
 	}
 
 	@Override
@@ -190,12 +189,12 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateWriteStack(INFO i) {
-		return "\tSTORE (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[LB]\n";
+		return "\tSTORE (" + i.getType().getTaille() + ") " + (i.getDep() - i.getType().getTaille()) + "[LB]\n";
 	}
 	
 	@Override
 	public String generateReadStack(INFO i) {
-		return "\tLOAD (" + i.getType().getTaille() + ") " + (i.getDep() - 1) + "[LB]\n";
+		return "\tLOAD (" + i.getType().getTaille() + ") " + (i.getDep() - i.getType().getTaille()) + "[LB]\n";
 	}
 	
 	@Override

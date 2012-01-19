@@ -28,7 +28,7 @@ public interface IGenerator {
 
 	String generateNull();
 
-	String generateInstance(Clazz glob_72_clazz, Signature att_signature);
+	String generateInstance(Clazz clazz, Signature signature, String codeArgs);
 
 	String generateIfThenElse(String codeCond, String codeTrue, String codeFalse);
 

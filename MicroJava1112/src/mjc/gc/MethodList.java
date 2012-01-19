@@ -132,9 +132,11 @@ public class MethodList implements Cloneable {
 	 * @param methodList the method list to merge into this one
 	 */
 	public void merge(MethodList methodList) {
-		for (Signature signature : methodList.signatures) {
-			if (!signatures.contains(signature)) {
-				signatures.add(signature);
+		if (methodList != null && methodList.signatures != null) {
+			for (Signature signature : methodList.signatures) {
+				if (!signatures.contains(signature)) {
+					signatures.add(signature);
+				}
 			}
 		}
 	}

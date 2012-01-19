@@ -67,9 +67,18 @@ public class Clazz extends DTYPE {
 	 * @param signature the signature we want
 	 */
 	
-	public String getEtiquette(String name, Signature signature) {
-		int index = methods.get(name).getSignatureList().indexOf(signature);
-		return methods.get(name).getEtiquetteList().get(index);
+	public String getEtiquette(String m_name, Signature signature) {
+		if (methods.get(m_name) != null) {
+			int index = methods.get(m_name).getSignatureList().indexOf(signature);
+			return methods.get(m_name).getEtiquetteList().get(index);
+		} else {
+			return extended.getEtiquette(m_name, signature);
+		}
+	}
+	
+	public String getEtiquetteCons(Signature signature) {
+		int index = constructors.getSignatureList().indexOf(signature);
+		return constructors.getEtiquetteList().get(index);
 	}
 
 	/** Give total size for the attributes.

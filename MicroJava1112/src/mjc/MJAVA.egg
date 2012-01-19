@@ -56,8 +56,8 @@ syn dep : Integer for PARFS, PARF, PARFSX;
 -- Détermine si l'évaluation d'une expression doit engendrer une lecture ou une écriture mémoire
 inh genWrite : BOOLEAN for AFFX, ER, ES, T, F, ERX, ESX, TX;
 
--- Détermine si une expression est dans un if ou un return (pour générer une lecture mémoire plutôt qu'une écriture)
-
+-- On doit savoir le nom de l'ident à affecter dans le cas F -> nouveau ...
+inh name : String for F, T, ES, ER, AFFX;
 
 -- les terminaux 
 
@@ -411,7 +411,7 @@ do
         call DEF^clazz.addAttribute(ident^txt, TYPE^type);
         DEF^code := ""; -- Génération (Rien à faire, puisque que l'objet n'est pas encore instancié.
     end
-        DEF^addr := DEF^laddr + TYPE^type.getTaille();
+    DEF^addr := DEF^laddr + TYPE^type.getTaille();
 end
 }
 
@@ -932,10 +932,12 @@ do
             error(err_hidding, ident^txt);
         else
             generate := true;
+            call INST^tds.inserer(ident^txt, new INFO(TYPE^type, INST^laddr + TYPE^type.getTaille()));
         end
     end
     -- Ici, on se trouve à droite de l'expression, donc on va générer une lecture en mémoire
     AFFX^genWrite := false;
+    AFFX^name := ident^txt;
 end
 }
 
@@ -945,7 +947,6 @@ do
     if AFFX^type /= nil then
         if AFFX^type.isType(TYPE^type) then
             INST^addr := INST^laddr + TYPE^type.getTaille();
-            call INST^tds.inserer(ident^txt, new INFO(TYPE^type, INST^laddr + TYPE^type.getTaille()));
         else
             -- ERROR
             generate := false;
@@ -953,7 +954,6 @@ do
         end
     else
         INST^addr := INST^laddr + TYPE^type.getTaille();
-        call INST^tds.inserer(ident^txt, new INFO(TYPE^type, INST^laddr + TYPE^type.getTaille()));
     end
 end
 }
@@ -1031,6 +1031,7 @@ INST -> si paro #tds ER parf BLOC SIX #up #gen ;
 do
     BLOC^tds := new TDS(INST^tds);
     ER^genWrite := false;
+    ER^name := "";
 end
 }
 
@@ -1096,6 +1097,7 @@ INST ->  retour #genWrite ER pv #up #gen ;
 #genWrite {
 do
     ER^genWrite := false;
+    ER^name := "";
 end
 }
 
@@ -1136,6 +1138,8 @@ global
 do
     ER^genWrite := true;
     AFFX^genWrite := false;
+    ER^name := "";
+    AFFX^name := "";
 end
 }
 
@@ -1177,7 +1181,12 @@ end
 }
 
 -- affectation
-AFFX ->  affect ER #up #gen ;
+AFFX ->  affect #name ER #up #gen ;
+#name {
+do
+    ER^name := AFFX^name;
+end
+}
 
 -- Remonte les attributs :
 --  * type
@@ -1212,7 +1221,12 @@ end
 }
 
 -- relation
-ER -> ES #down ERX #up #gen ;
+ER -> #name ES #down ERX #up #gen ;
+#name {
+do
+    ES^name := ER^name;
+end
+}
 
 -- Passe le type de gauche a ERX
 #down{
@@ -1236,7 +1250,12 @@ do
 end
 }
 
-ES ->  T #down ESX #up #gen ;
+ES -> #name T #down ESX #up #gen ;
+#name {
+do
+    T^name := ES^name;
+end
+}
 
 -- Passe le type de gauche a ESX
 #down{
@@ -1265,6 +1284,7 @@ ERX ->  #opreltype OPREL ES #checktype #up #gen ;
 #opreltype {
 do
     OPREL^opType := ERX^ltype;
+    ES^name := "";
 end
 }
 
@@ -1429,7 +1449,12 @@ end
 }
 
 -- addition, ...
-ESX -> OPADD T #checktype #down ESX #up #gen ;
+ESX -> OPADD #name T #checktype #down ESX #up #gen ;
+#name {
+do
+    T^name := "";
+end
+}
 
 global
     generate : BOOLEAN;
@@ -1542,7 +1567,12 @@ do
 end
 }
 
-T ->  F #down TX #up #gen ;
+T ->  #name F #down TX #up #gen ;
+#name {
+do
+    F^name := T^name;
+end
+}
 
 -- Passe le type de gauche a ESX
 #down{
@@ -1567,7 +1597,12 @@ end
 }
 
 -- multiplication, ...
-TX -> OPMUL F #checktype #down TX #up #gen ;
+TX -> OPMUL #name F #checktype #down TX #up #gen ;
+#name {
+do
+    F^name := "";
+end
+}
 
 global
     generate : BOOLEAN;
@@ -1888,16 +1923,6 @@ do
                 end
             else
             if constructors.doAccept(ARGS^signature) then
-                -- OK
-                    -- DISCUSS
-                    -- On a un petit probleme en cas d'ambiguite. Je m'explique :
-                    -- les constructeur Toto(A a) et Toto(B b) sont definis.
-                    --   - Aucune relation entre A et B
-                    --   - A est une classe concrete
-                    --   - B est une interface
-                    --
-                    -- maintenant on construit une classe C extend A implements B...
-                    -- Et quel constructeur on prend pour Toto(c) avec c de classe C ???
                 generate := true;
             else
                 -- ERROR
@@ -1921,9 +1946,12 @@ end
 
 -- Generation du code
 #gen{
+local
+    info : INFO;
 do
     if generate then
-        F^code := F^generator.generateInstance(clazz, ARGS^signature);
+        info := F^tds.chercherGlobalement(F^name);
+        F^code := F^generator.generateInstance(clazz, ARGS^signature, ARGS^code) + F^generator.generateWriteStack(info);
     else
         F^code := "";
     end
@@ -2201,6 +2229,7 @@ ARGS -> #genWrite ER ARGSX #up #gen ;
 #genWrite {
 do
     ER^genWrite := false;
+    ER^name := "";
 end
 }
 

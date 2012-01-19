@@ -1,4 +1,8 @@
-class Fact {
+class Lol {
+	int troplol() {return 0;}
+}
+
+class Fact extends Lol {
 int f;
 int g;
   int fact(int n) {
@@ -11,7 +15,8 @@ int g;
     }
 
   void main(int arg) {
-    int x = fact(100);
-    int y = x;
+	  troplol();
+	  int x = troplol();
+	  int y = fact(9);
   }
 }

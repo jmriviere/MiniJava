@@ -27,7 +27,7 @@ public class Domain {
 	 * 
 	 * @param position the position of the parameter
 	 * @param type the real type of the parameter
-	 * @return true if a parameter of this type cann be put at this position
+	 * @return true if a parameter of this type can be put at this position
 	 */
 	public boolean accepts(int position, DTYPE type) {
 		if (position>types.length) {

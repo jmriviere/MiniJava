@@ -27,10 +27,13 @@ syn signature : Signature for PARFS, PARFSX, ARGS, ARGSX;
 
 -- Le domaine des operateurs
 syn domain : Domain for OPREL, OPADD, OPMUL, OPUN;
+-- On doit pouvoir tester l'égalité entre entiers et également entre booléen
+inh opType : DTYPE for OPREL;
 
 inh tds : TDS for PARFS, PARFSX, PARF, MCORPS, BLOC, INST, INSTS, SIX, E, AFFX, ER, ERX, ES, ESX, T, TX, F, Q, ARGS, ARGSX;
 
 -- Le retour des methodes
+inh tailleArgs : Integer for MCORPS, BLOC, INSTS, INST, SIX;
 inh returns : DTYPE for MCORPS, BLOC, INSTS, INST, SIX;
 inh hreturned : BOOLEAN for MCORPS, BLOC, INSTS, INST, SIX;
 syn sreturned : BOOLEAN for MCORPS, BLOC, INSTS, INST, SIX;
@@ -47,8 +50,14 @@ syn code : String for ARGS, ARGSX, Q, F, TX, T, ESX, ES, ERX, ER, AFFX, E, SIX, 
 syn addr : Integer for DEF, DEFS, INSTS, INST;
 inh laddr : Integer for DEF, DEFS, INSTS, INST, BLOC, SIX;
 
+-- Le déplacement des arguments passés à la méthode
+inh ldep : Integer for PARFS, PARFSX, PARF;
+syn dep : Integer for PARFS, PARF, PARFSX;
 -- Détermine si l'évaluation d'une expression doit engendrer une lecture ou une écriture mémoire
 inh genWrite : BOOLEAN for AFFX, ER, ES, T, F, ERX, ESX, TX;
+
+-- Détermine si une expression est dans un if ou un return (pour générer une lecture mémoire plutôt qu'une écriture)
+
 
 -- les terminaux 
 
@@ -412,6 +421,7 @@ DEF ->  TYPE ident #checkname paro #down PARFS parf #check #downbody MCORPS #gen
 global
     tds : TDS;
     generate : BOOLEAN;
+    etiquette : String;
     
 -- Verifie la bonne denomination de la methode
 #checkname {
@@ -435,6 +445,7 @@ end
 do
     tds := new TDS();
     PARFS^tds := tds;
+    PARFS^ldep := 0;
 end
 }
 
@@ -459,13 +470,14 @@ do
     MCORPS^returns := TYPE^type;
     MCORPS^hreturned := false;
     DEF^addr := DEF^laddr;
+    etiquette := DEF^generator.generateEtiquette();
+    call DEF^clazz.addEtiquette(ident^txt, etiquette);
+    MCORPS^tailleArgs := PARFS^dep + 2;
 end
 }
 
 -- Generation du code
 #gen{
-local
-    etiquette : String;
 do
     if DEF^clazz.isInterfaze()then
     
@@ -476,9 +488,7 @@ do
     end
     if generate then
     -- TODO: Générer une erreur si on trouve une fonction main (main ne peut pas retourner de valeur)
-        etiquette := DEF^generator.generateEtiquette();
-        call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code + DEF^generator.generateReturn(0,TYPE^type.getTaille());
+        DEF^code := DEF^generator.generateMethod(DEF^clazz, etiquette, ident^txt) + MCORPS^code;
     end
 end
 }
@@ -512,6 +522,7 @@ end
 do
     tds := new TDS();
     PARFS^tds := tds;
+    PARFS^ldep := 0;
 end
 }
 
@@ -536,6 +547,7 @@ do
     MCORPS^returns := nil;
     MCORPS^hreturned := false;
     DEF^addr := DEF^laddr;
+    MCORPS^tailleArgs := 0;
 end
 }
 
@@ -606,6 +618,7 @@ end
 do
     BLOC^hreturned := false;
     BLOC^laddr := 3;
+    BLOC^tailleArgs := MCORPS^tailleArgs;
 end
 }
 
@@ -645,6 +658,7 @@ end
 do
     tds := new TDS();
     PARFS^tds := tds;
+    PARFS^ldep := 0;
 end
 }
 
@@ -671,6 +685,7 @@ do
     BLOC^hreturned := false;
     BLOC^returns := nil;
     BLOC^laddr := 3;
+    BLOC^tailleArgs := PARFS^dep;
 end
 }
 
@@ -733,12 +748,18 @@ PARFS -> #up ;
 #up{
 do
     PARFS^signature := new Signature();
+    PARFS^dep := PARFS^ldep;
 end
 }
 
-PARFS ->  PARF PARFSX #up ;
-
+PARFS -> PARF #dep PARFSX #up ;
 -- Remonte la signature
+#dep {
+do
+    PARFSX^ldep := PARF^dep;
+end
+}
+
 #up{
 local
     signature : Signature;
@@ -746,6 +767,7 @@ do
     signature := PARFSX^signature;
     call signature.add(0, PARF^type);
     PARFS^signature := signature;
+    PARFS^dep := PARFSX^dep;
 end
 }
 
@@ -755,11 +777,16 @@ PARFSX -> #up ;
 #up{
 do
     PARFSX^signature := new Signature();
+    PARFSX^dep := PARFSX^ldep;
 end
 }
 
-PARFSX -> virg  PARF  PARFSX #up ;
-
+PARFSX -> virg  PARF #dep PARFSX #up ;
+#dep {
+do
+    PARFSX1^ldep := PARF^dep;
+end
+}
 -- Remonte la signature
 #up{
 local
@@ -768,6 +795,7 @@ do
     signature := PARFSX1^signature;
     call signature.add(0, PARF^type);
     PARFSX^signature := signature;
+    PARFSX^dep := PARFSX1^dep;
 end
 }
 
@@ -775,6 +803,8 @@ PARF ->  TYPE ident #sign ;
 
 -- Ajoute l'element dans la tds et remonte le type
 #sign{
+local
+    dep : Integer;
 do
     -- TODO: Vérifier que l'argument n'existe pas déjà dans la tds.
     PARF^type := TYPE^type;
@@ -786,7 +816,9 @@ do
             -- ERROR
             error(err_hidding, ident^txt);
         else
-            call PARF^tds.inserer(ident^txt, new INFO(TYPE^type, 0));
+            dep := PARF^ldep + TYPE^type.getTaille();
+            call PARF^tds.inserer(ident^txt, new INFO(TYPE^type, 0 - dep + 1));
+            PARF^dep := dep;
         end
     end
 end
@@ -992,12 +1024,13 @@ end
 }
 
 -- conditionnelle
-INST -> si paro #tds E parf BLOC SIX #up #gen ;
+INST -> si paro #tds ER parf BLOC SIX #up #gen ;
 
 -- Genere une sous tds pour le bloc
 #tds{
 do
     BLOC^tds := new TDS(INST^tds);
+    ER^genWrite := false;
 end
 }
 
@@ -1013,7 +1046,7 @@ end
 #gen{
 do
     INST^addr := INST^laddr;
-    INST^code := INST^generator.generateIfThenElse(E^code, BLOC^code, SIX^code);
+    INST^code := INST^generator.generateIfThenElse(ER^code, BLOC^code, SIX^code);
 end
 }
 
@@ -1059,7 +1092,12 @@ end
 }
 
 -- return
-INST ->  retour E pv #up #gen ;
+INST ->  retour #genWrite ER pv #up #gen ;
+#genWrite {
+do
+    ER^genWrite := false;
+end
+}
 
 global
     generate : BOOLEAN;
@@ -1069,11 +1107,11 @@ global
 #up{
 do
     INST^sreturned := true;
-    if E^type.isType(INST^returns) then
+    if ER^type.isType(INST^returns) then
         generate := true;
     else
         generate := false;
-        error(err_return_type, E^type.getName(), INST^returns.getName());
+        error(err_return_type, ER^type.getName(), INST^returns.getName());
     end
 end
 }
@@ -1083,7 +1121,7 @@ end
 do
     if generate then
         INST^addr := INST^laddr;
-        INST^code := E^code;
+        INST^code := ER^code + INST^generator.generateReturn(ER^type.getTaille(), INST^tailleArgs);
     end
 end
 }
@@ -1223,7 +1261,12 @@ do
 end
 }
 
-ERX ->  OPREL ES #checktype #up #gen ;
+ERX ->  #opreltype OPREL ES #checktype #up #gen ;
+#opreltype {
+do
+    OPREL^opType := ERX^ltype;
+end
+}
 
 global
     generate : BOOLEAN;
@@ -1350,7 +1393,11 @@ OPREL -> eg #up #gen ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
+    if OPREL^opType.compareTo(new DTYPE("Integer", 1)) | OPREL^opType.compareTo(new DTYPE("Boolean", 1)) then
+        OPREL^domain := new Domain(new DTYPE("Boolean",1), OPREL^opType, OPREL^opType);
+    else
+        error(err_comp);
+    end
 end
 }
 
@@ -1366,7 +1413,11 @@ OPREL -> neg #up #gen ;
 -- Remonte le domaine
 #up{
 do
-    OPREL^domain := new Domain(new DTYPE("Boolean",1), new DTYPE("Integer",1), new DTYPE("Integer",1));
+    if OPREL^opType.compareTo(new DTYPE("Integer", 1)) | OPREL^opType.compareTo(new DTYPE("Boolean", 1)) then
+        OPREL^domain := new Domain(new DTYPE("Boolean",1), OPREL^opType, OPREL^opType);
+    else
+        error(err_comp);
+    end
 end
 }
 
@@ -1951,6 +2002,7 @@ F -> ident paro ARGS parf #down Q #up ;
 global
     isPrimitif : BOOLEAN;
     method : MethodList;
+    etiquette : String;
 
 -- Descend les bon attribut pour Q
 #down{
@@ -1989,7 +2041,8 @@ do
     if isPrimitif then
         F^type := method.getReturnType();
     end
-    F^code := Q^code;
+    etiquette := F^clazz.getEtiquette(ident^txt, ARGS^signature);
+    F^code := F^generator.generateAffectation("null", "", 2) + ARGS^code + F^generator.generateMethodCall(etiquette);
 end
 }
 
@@ -2140,11 +2193,16 @@ end
 -- Remonte le type et le code
 #gen{
 do
-    Q^code := Q^generator.generateQualification(Q^generator.generateMethodCall(method, ARGS^code), Q1^code);
+    Q^code := ARGS^code;
 end
 }
 
-ARGS -> E ARGSX #up #gen ;
+ARGS -> #genWrite ER ARGSX #up #gen ;
+#genWrite {
+do
+    ER^genWrite := false;
+end
+}
 
 -- Remonte la signature
 #up{
@@ -2152,7 +2210,7 @@ local
     signature : Signature;
 do
     signature := ARGSX^signature;
-    call signature.add(0, E^type);
+    call signature.add(0, ER^type);
     ARGS^signature := signature;
 end
 }
@@ -2160,7 +2218,7 @@ end
 -- Generation de code
 #gen{
 do
-    ARGS^code := E^code + ARGSX^code;
+    ARGS^code := ARGSX^code + ER^code;
 end
 }
 

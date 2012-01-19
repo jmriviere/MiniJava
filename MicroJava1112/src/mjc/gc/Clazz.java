@@ -48,7 +48,7 @@ public class Clazz extends DTYPE {
 	/**
 	 * Method addConstructor or addMethod must be called before this one can
 	 * be called.
-	 * @param name the name of the class
+	 * @param name the name of the method
 	 * @param etiquette the etiquette associated to the signature
 	 * 
 	 */
@@ -60,8 +60,19 @@ public class Clazz extends DTYPE {
 			constructors.addEtiquette(etiquette);
 		}
 	}
+	
+	/**
+	 * Gets the etiquette associated to the given method
+	 * @param name the name of the method
+	 * @param signature the signature we want
+	 */
+	
+	public String getEtiquette(String name, Signature signature) {
+		int index = methods.get(name).getSignatureList().indexOf(signature);
+		return methods.get(name).getEtiquetteList().get(index);
+	}
 
-	/* Renvoie la somme des tailles des attributes
+	/** Give total size for the attributes.
 	 * @see mjc.gc.DTYPE#getTaille()
 	 */
 	public int getTaille(){
@@ -248,7 +259,7 @@ public class Clazz extends DTYPE {
 	 * Returns a set of signature that posses the given name.
 	 * 
 	 * @param methodName the name of the method
-	 * @return the set of method signatures with that name. null if if does not exists.
+	 * @return the set of method signatures with that name. null if it does not exists.
 	 */
 	public MethodList getMethodList(String methodName) {
 		MethodList ret=null;

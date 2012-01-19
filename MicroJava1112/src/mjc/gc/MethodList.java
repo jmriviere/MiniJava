@@ -71,6 +71,13 @@ public class MethodList implements Cloneable {
     }
     
     /**
+     * @return returns all the etiquettes in this MethodList
+     */
+    public ArrayList<String> getEtiquetteList() {
+    	return etiquettes;
+    }
+    
+    /**
      * Test a signature for a call to this method
      * 
      * @param signature the signature to test

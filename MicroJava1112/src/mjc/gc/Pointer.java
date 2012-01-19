@@ -5,7 +5,7 @@ public class Pointer extends DTYPE {
 	private Clazz clazz;
 	
 	public Pointer(Clazz clazz) {
-		super(clazz.getName(), 1);
+		super(clazz.getName(), 2);
 		this.clazz = clazz;
 	}
 	

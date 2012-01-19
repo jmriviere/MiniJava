@@ -169,9 +169,8 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateMethodCall(MethodList m_list, String m_name) {
-		// TODO Auto-generated method stub
-		return "";
+	public String generateMethodCall(String m_etiq) {
+		return "\tCALL (LB) " + m_etiq + "\n";
 	}
 
 	@Override
@@ -186,7 +185,7 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateMethod(Clazz clazz, String etiquette, String name) {
-		return ";Method " + name +" from class " + clazz.getName() + "\n" + etiquette;
+		return ";Method " + name +" from class " + clazz.getName() + "\n" + etiquette + "\n";
 	}
 
 	@Override

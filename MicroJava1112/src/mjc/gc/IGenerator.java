@@ -69,7 +69,7 @@ public interface IGenerator {
 	
 	String generateReadStack(INFO i);
 	
-	String generateMethodCall(MethodList m_list, String m_name);
+	String generateMethodCall(String m_etiq);
 	
 	String generateMethod(Clazz clazz, String etiquette, String name);
 	

@@ -1,7 +1,9 @@
 package mjc.gc;
 
 public interface IGenerator {
-
+	
+	String generateWriteHeap(INFO i);
+	
 	String generateVtable(Clazz clazz);
 	
 	String generateEtiquette();
@@ -28,7 +30,9 @@ public interface IGenerator {
 
 	String generateNull();
 
-	String generateInstance(Clazz clazz, Signature signature, String codeArgs);
+	String generateInstance(Clazz clazz);
+	
+	String generateCallConstructor(Clazz clazz, Signature signature);
 
 	String generateIfThenElse(String codeCond, String codeTrue, String codeFalse);
 

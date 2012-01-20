@@ -13,10 +13,16 @@ public class TamGenerator implements IGenerator {
 	}
 	
 	@Override
+	public String generateWriteHeap(INFO i) {
+		return generateReadStack(i) + "\tSTOREI (" + i.getType().getTaille() + ")\n";
+	}
+	
+	@Override
 	public String generateBloc(String att_code) {
 		// TODO Auto-generated method stub
 		return "";
 	}
+	
 	public String generateVtable(Clazz construct){
 		
 		return "";
@@ -73,8 +79,14 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateInstance(Clazz clazz, Signature signature, String codeArgs) {
-		return "\tLOADL " + clazz.getTaille() + "\n\tSUBR Malloc\n";
+	public String generateInstance(Clazz clazz) {
+		return "\tLOADL " + clazz.getTaille() + "\n\tSUBR Malloc\n\tPUSH 1\n";
+	}
+	
+	@Override
+	public String generateCallConstructor(Clazz clazz, Signature signature) {
+		String etiq = clazz.getEtiquetteCons(signature);
+		return "\tCALL (LB) " + etiq + "\n";
 	}
 
 	@Override

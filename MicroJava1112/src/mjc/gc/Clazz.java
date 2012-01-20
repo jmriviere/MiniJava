@@ -25,6 +25,9 @@ public class Clazz extends DTYPE {
 	// Contient la liste des méthodes définies
 	private HashMap<String, MethodList> methods;
 	
+	// Donne le déplacement de chaque attribut
+	private ArrayList<String> attributesDep; 
+	
 	private MethodList constructors;
 
 	// Spécifie respectivement la classe implémentée et l'interface étendue.
@@ -43,6 +46,7 @@ public class Clazz extends DTYPE {
 		attributes = new HashMap<String, DTYPE>();
 		methods = new HashMap<String, MethodList>();
 		constructors = new MethodList(name, null);
+		attributesDep = new ArrayList<String>();
 	}
 	
 	/**
@@ -136,6 +140,11 @@ public class Clazz extends DTYPE {
 		}
 		return ret;
 	}
+	
+	public int getAttributeDep(String attrName) {
+		System.out.println(attributesDep);
+		return attributesDep.indexOf(attrName);
+	}
 
 	/**
 	 * Adds an attribute
@@ -145,6 +154,7 @@ public class Clazz extends DTYPE {
 	 */
 	public void addAttribute(String attributeName, DTYPE type) {
 		attributes.put(attributeName, type);
+		attributesDep.add(attributeName);
 		taille += type.getTaille();
 	}
 	

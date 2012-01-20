@@ -407,10 +407,9 @@ do
     elseif DEF^clazz.isInterfaze() then
         -- ERROR: Une interface ne peut pas déclarer d'attribut.
         error(err_attribute_interface, DEF^clazz.getName());
-    else
-        call DEF^clazz.addAttribute(ident^txt, TYPE^type);
-        DEF^code := ""; -- Génération (Rien à faire, puisque que l'objet n'est pas encore instancié.
     end
+    call DEF^clazz.addAttribute(ident^txt, TYPE^type);
+    DEF^code := ""; -- Génération (Rien à faire, puisque que l'objet n'est pas encore instancié.
     DEF^addr := DEF^laddr + TYPE^type.getTaille();
 end
 }
@@ -1951,7 +1950,7 @@ local
 do
     if generate then
         info := F^tds.chercherGlobalement(F^name);
-        F^code := F^generator.generateInstance(clazz, ARGS^signature, ARGS^code) + F^generator.generateWriteStack(info);
+        F^code := F^generator.generateInstance(clazz) + F^generator.generateWriteStack(info) + ARGS^code + F^generator.generateCallConstructor(clazz, ARGS^signature);
     else
         F^code := "";
     end
@@ -1967,7 +1966,11 @@ local
     info : INFO;
 do
     type := F^clazz.getAttribute(ident^txt);
-    F^code := F^generator.generateGetAttribute(ident^txt, F^clazz);
+    --F^code := F^generator.generateGetAttribute(ident^txt, F^clazz);
+    info := new INFO(type, 4);
+    if type /= nil then
+    F^code := F^generator.generateWriteHeap(info);
+    end
     info := F^tds.chercherGlobalement(ident^txt);
     if info /= nil then
         type := info.getType();

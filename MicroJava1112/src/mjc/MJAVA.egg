@@ -215,7 +215,7 @@ end
 #gen{
 do
     if generate then
-        DEFCLASSE^code := DEFCLASSE^generator.generateVtable(clazz) + CORPS^code;
+        DEFCLASSE^code := CORPS^code;
     end
 end
 }
@@ -1953,7 +1953,7 @@ local
 do
     if generate then
         info := F^tds.chercherGlobalement(F^name);
-        F^code := F^generator.generateNew(clazz, info, ARGS^code, ARGS^signature);
+        F^code := F^generator.generateNew(clazz, info, ARGS^code, ARGS^signature) + F^generator.generateVtable(clazz, clazz);
     else
         F^code := "";
     end

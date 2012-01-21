@@ -1,5 +1,7 @@
 package mjc.gc;
 
+import java.util.ArrayList;
+
 public class TamGenerator implements IGenerator {
 
 	private static int cptr = 0;
@@ -33,8 +35,16 @@ public class TamGenerator implements IGenerator {
 		return "";
 	}
 	
-	public String generateVtable(Clazz construct){
-		
+	public String generateVtable(Clazz pointed, Clazz real) {
+		String retour = "";
+		if (pointed.getName().equals(real.getName())) {
+			for (MethodList m : real.getMethods().values()) {
+				for (String etiq : m.getEtiquetteList()) {
+					retour += "\n\tLOADA " + etiq;
+				}
+					
+			}
+		}
 		return "";
 	}
 

@@ -8,7 +8,7 @@ public interface IGenerator {
 	
 	String generateLoadObj(INFO i);
 	
-	String generateVtable(Clazz clazz);
+	String generateVtable(Clazz pointed, Clazz real);
 	
 	String generateEtiquette();
 	

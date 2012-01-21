@@ -105,6 +105,10 @@ public class Clazz extends DTYPE {
 		return name;
 	}
 	
+	public HashMap<String, MethodList> getMethods() {
+		return methods;
+	}
+	
 	/**
 	 * Tests the interface state of the class. If false, it is a concrete class.
 	 * 

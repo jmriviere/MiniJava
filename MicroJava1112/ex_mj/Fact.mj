@@ -15,8 +15,6 @@ int g;
     }
 
   void main(int arg) {
-	  troplol();
-	  int x = troplol();
-	  int y = fact(9);
+	  int y = fact(6);
   }
 }

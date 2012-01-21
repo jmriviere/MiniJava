@@ -25,8 +25,8 @@ public class Clazz extends DTYPE {
 	// Contient la liste des méthodes définies
 	private HashMap<String, MethodList> methods;
 	
-	// Donne le déplacement de chaque attribut
-	private ArrayList<String> attributesDep; 
+	// Donne le déplacement de chaque attribut par rapport à l'adresse de l'objet
+	private ArrayList<String> attributesDep;
 	
 	private MethodList constructors;
 
@@ -89,13 +89,14 @@ public class Clazz extends DTYPE {
 	 * @see mjc.gc.DTYPE#getTaille()
 	 */
 	public int getTaille(){
-		int t;
+/*		int t;
 		t = 0;
 			for ( DTYPE dt : this.attributes.values()) {
 				t = dt.getTaille()+t;				
 			}	
 		return t;	
-		
+	*/
+		return taille;
 	}
 	/**
 	 * Returns the name of the class
@@ -223,7 +224,8 @@ public class Clazz extends DTYPE {
 	 */
 	public void setExtended(Clazz other) {
 		extended = other;
-		taille += other.getTaille();
+		taille += other.taille;
+		attributesDep = other.attributesDep;
 	}
 	
 	/**

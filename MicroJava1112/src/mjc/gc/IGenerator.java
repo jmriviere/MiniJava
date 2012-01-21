@@ -2,7 +2,11 @@ package mjc.gc;
 
 public interface IGenerator {
 	
-	String generateWriteHeap(INFO i);
+	String generateWriteHeap(INFO i, int attrDep);
+	
+	String generateReadHeap(INFO i, int attrDep);
+	
+	String generateLoadObj(INFO i);
 	
 	String generateVtable(Clazz clazz);
 	
@@ -14,8 +18,10 @@ public interface IGenerator {
 
 	String generateConstructor(Clazz construct, String etiquette);
 
-	String generateAffectation(String variable, String code, int dep);
+	String generateAffectationBase(String variable, String code, int dep);
 
+	String generateAffectationPointer(String variable, String code, int dep);
+	
 	String generateRelativeOperation(String att_lcode, String att_code,
 			String att_code2);
 
@@ -82,6 +88,8 @@ public interface IGenerator {
 	String generateReturn(int nb_args, int nb_mots_retour);
 	
 	boolean canCreateMain();
+	
+	String generateSwapArgs(String code);
 	
 	// TODO: mettre des noms de paramètres explicites
 	String generateQualification(String toto, String tata);

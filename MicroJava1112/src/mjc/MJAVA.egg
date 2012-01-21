@@ -697,8 +697,7 @@ do
     if generate then
         etiquette := DEF^generator.generateEtiquette();
         call DEF^clazz.addEtiquette(ident^txt, etiquette);
-        DEF^code := DEF^generator.generateConstructor(DEF^clazz, etiquette) + BLOC^code;
-        -- Manque le return 
+        DEF^code := DEF^generator.generateConstructor(DEF^clazz, etiquette) + BLOC^code + DEF^generator.generateReturn(PARFS^dep + 2, 0);
     end
 end
 }
@@ -816,7 +815,7 @@ do
             error(err_hidding, ident^txt);
         else
             dep := PARF^ldep + TYPE^type.getTaille();
-            call PARF^tds.inserer(ident^txt, new INFO(TYPE^type, 0 - dep + 1));
+            call PARF^tds.inserer(ident^txt, new INFO(TYPE^type,  0 - dep - 1));
             PARF^dep := dep;
         end
     end
@@ -968,10 +967,14 @@ end
 -- Generation du code
 #gen{
 do
---    INST^addr := TYPE^type.getTaille();
     if generate then
         INST^addr := INST^laddr + TYPE^type.getTaille();
-        INST^code := INST^generator.generateAffectation(ident^txt, AFFX^code, TYPE^type.getTaille());
+        match TYPE^type
+        with Pointer then
+            INST^code := INST^generator.generateAffectationPointer(ident^txt, AFFX^code,TYPE^type.getTaille());
+        else
+          INST^code := INST^generator.generateAffectationBase(ident^txt, AFFX^code, TYPE^type.getTaille());
+        end
     end
 end
 }
@@ -1916,7 +1919,6 @@ do
             if constructors.isEmpty() then
                 if ARGS^signature.equals(new Signature()) then
                     -- OK
-                    -- TODO: Et si un constructeur est defini plus tard ?
                 else
                     error(err_unknown_constructor, ARGS^signature.toString());
                 end
@@ -1947,10 +1949,11 @@ end
 #gen{
 local
     info : INFO;
+    type : DTYPE;
 do
     if generate then
         info := F^tds.chercherGlobalement(F^name);
-        F^code := F^generator.generateInstance(clazz) + F^generator.generateWriteStack(info) + ARGS^code + F^generator.generateCallConstructor(clazz, ARGS^signature);
+        F^code := F^generator.generateSwapArgs(ARGS^code) + F^generator.generateInstance(clazz) + F^generator.generateWriteStack(info) + F^generator.generateReadStack(info) + F^generator.generateCallConstructor(clazz, ARGS^signature);
     else
         F^code := "";
     end
@@ -1967,9 +1970,13 @@ local
 do
     type := F^clazz.getAttribute(ident^txt);
     --F^code := F^generator.generateGetAttribute(ident^txt, F^clazz);
-    info := new INFO(type, 4);
     if type /= nil then
-    F^code := F^generator.generateWriteHeap(info);
+        info := new INFO(type, -1);
+        if F^genWrite then
+            F^code := F^generator.generateReadStack(info) + F^generator.generateWriteHeap(info, F^clazz.getAttributeDep(ident^txt));
+        else
+            F^code := F^generator.generateReadStack(info) + F^generator.generateReadHeap(info, F^clazz.getAttributeDep(ident^txt));
+        end
     end
     info := F^tds.chercherGlobalement(ident^txt);
     if info /= nil then
@@ -1990,15 +1997,18 @@ end
 
 F -> ident pt ident #down Q #up ;
 
-global info : INFO;
+global 
+    info : INFO;
+    info2 : INFO;
+    type : DTYPE;
+    type2 : DTYPE;
 
 -- Descend les bon attribut pour Q
 #down{
-local
-    type : DTYPE;
 do
     type := F^clazz.getAttribute(ident^txt);
     info := F^tds.chercherGlobalement(ident^txt);
+
     if info /= nil then
         type := info.getType();
     end
@@ -2024,7 +2034,24 @@ end
 #up{
 do
     F^type := Q^type;
-    F^code := F^generator.generateReadStack(info) + Q^code;
+    if type /= nil then
+        match type 
+        with Pointer then
+            type2 := type.getClazz();
+        end
+        match type2
+        with Clazz then
+            type := type2.getAttribute(ident1^txt);
+            info2 := new INFO(type, 0);
+            if F^genWrite then
+                F^code := F^generator.generateLoadObj(info) + F^generator.generateWriteHeap(info2, type2.getAttributeDep(ident1^txt));
+            else
+                F^code := F^generator.generateLoadObj(info) + F^generator.generateReadHeap(info2, type2.getAttributeDep(ident1^txt));
+            end
+        end
+    else
+    --    F^code := F^generator.generateReadStack(info) + Q^code;
+    end
 end
 }
 
@@ -2073,7 +2100,7 @@ do
         F^type := method.getReturnType();
     end
     etiquette := F^clazz.getEtiquette(ident^txt, ARGS^signature);
-    F^code := F^generator.generateAffectation("null", "", 2) + ARGS^code + F^generator.generateMethodCall(etiquette);
+    F^code := F^generator.generateSwapArgs(ARGS^code) + F^generator.generateAffectationBase("null", "", 2) + F^generator.generateMethodCall(etiquette);
 end
 }
 
@@ -2250,7 +2277,7 @@ end
 -- Generation de code
 #gen{
 do
-    ARGS^code := ARGSX^code + ER^code;
+    ARGS^code := "," + ER^code + ARGSX^code + ",,,";
 end
 }
 
@@ -2270,9 +2297,11 @@ do
 end
 }
 
-ARGSX -> virg #genWrite E ARGSX #up #gen ;
+ARGSX -> virg #genWrite ER ARGSX #up #gen ;
 #genWrite {
 do
+    ER^genWrite := false;
+    ER^name := "";
 end    
 }
 
@@ -2282,7 +2311,7 @@ local
     signature : Signature;
 do
     signature := ARGSX1^signature;
-    call signature.add(0, E^type);
+    call signature.add(0, ER^type);
     ARGSX^signature := signature;
 end
 }
@@ -2290,7 +2319,7 @@ end
 -- Generation de code
 #gen{
 do
-    ARGSX^code := E^code + ARGSX1^code;
+    ARGSX^code := "," + ER^code + "," + ARGSX1^code;
 end
 }
 

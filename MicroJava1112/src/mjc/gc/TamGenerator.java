@@ -13,8 +13,18 @@ public class TamGenerator implements IGenerator {
 	}
 	
 	@Override
-	public String generateWriteHeap(INFO i) {
-		return generateReadStack(i) + "\tSTOREI (" + i.getType().getTaille() + ")\n";
+	public String generateWriteHeap(INFO i, int attrDep) {
+		return "\tLOADL " + attrDep + "\n\tSUBR IAdd\n" + "\tSTOREI (" + i.getType().getTaille() + ")\n";
+	}
+	
+	@Override
+	public String generateLoadObj(INFO i) {
+		return generateReadStack(i) + "\tPOP (0) 1\n";
+	}
+	
+	@Override
+	public String generateReadHeap(INFO i, int attrDep) {
+		return "\tLOADL " + attrDep + "\n\tSUBR IAdd\n" + "\tLOADI (" + i.getType().getTaille() + ")\n";
 	}
 	
 	@Override
@@ -34,13 +44,18 @@ public class TamGenerator implements IGenerator {
 	}
 
 	@Override
-	public String generateAffectation(String variable, String code, int dep) {
+	public String generateAffectationBase(String variable, String code, int dep) {
 		if (code.equals("")) {
 			return "; Variable :" + variable + " sans init, taille = " + dep + "\n\t" + "PUSH " + dep + "\n";
 		}
 		else {
 			return "; Variable: " + variable + " avec init, taille = " + dep + "\n" + code;
 		}
+	}
+	
+	@Override
+	public String generateAffectationPointer(String variable, String code, int dep) {
+		return "; Pointeur :" + variable + "\n\t" + "PUSH " + dep + "\n" + code; 
 	}
 
 	@Override
@@ -68,6 +83,7 @@ public class TamGenerator implements IGenerator {
 			return "\tLOADL " + b + "\n\tSUBR I2B" +"\n";
 	}
 
+
 	@Override
 	public String generateCst(String val) {
 		return "\tLOADL " + val + "\n";
@@ -80,7 +96,7 @@ public class TamGenerator implements IGenerator {
 
 	@Override
 	public String generateInstance(Clazz clazz) {
-		return "\tLOADL " + clazz.getTaille() + "\n\tSUBR Malloc\n\tPUSH 1\n";
+		return "\tLOADL " + clazz.getTaille() + "\n\tSUBR Malloc\n" + "\tLOADL 15" + "\n\tSUBR Malloc\n";
 	}
 	
 	@Override
@@ -227,6 +243,23 @@ public class TamGenerator implements IGenerator {
 	@Override
 	public boolean canCreateMain() {
 		return cptr_main < 1;
+	}
+	
+	@Override
+	public String generateSwapArgs(String code) {
+			String newArgs = "";
+			int index;
+			while (!code.equals("")) {
+				index = code.indexOf(",");
+				if (index != 0) {
+					newArgs = code.substring(0, index - 1) + "\n" + newArgs;
+				}
+				while (index < code.length() && code.substring(index, index + 1).equals(",")) {
+					index += 1;
+				}
+				code = code.substring(index, code.length());
+			}
+			return newArgs;
 	}
 
 }

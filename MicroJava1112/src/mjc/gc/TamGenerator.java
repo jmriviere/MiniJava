@@ -222,6 +222,7 @@ public class TamGenerator implements IGenerator {
 	
 	@Override
 	public String generateReadStack(INFO i) {
+		System.out.println(i.getType() + ":" + i.getDep() + " lol " + i.getType().getTaille());
 		return "\tLOAD (" + i.getType().getTaille() + ") " + (i.getDep() - i.getType().getTaille()) + "[LB]\n";
 	}
 	
@@ -260,6 +261,15 @@ public class TamGenerator implements IGenerator {
 				code = code.substring(index, code.length());
 			}
 			return newArgs;
+	}
+	
+	@Override
+	public String generateNew(Clazz clazz, INFO info, String ArgsCode, Signature ConsSig) {
+		return  generateInstance(clazz) +
+				generateWriteStack(info) + 
+				generateSwapArgs(ArgsCode) +
+				generateReadStack(info) +
+				generateCallConstructor(clazz, ConsSig);
 	}
 
 }

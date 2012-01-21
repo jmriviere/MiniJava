@@ -815,7 +815,7 @@ do
             error(err_hidding, ident^txt);
         else
             dep := PARF^ldep + TYPE^type.getTaille();
-            call PARF^tds.inserer(ident^txt, new INFO(TYPE^type,  0 - dep - 1));
+            call PARF^tds.inserer(ident^txt, new INFO(TYPE^type,  0 - PARF^ldep - 2));
             PARF^dep := dep;
         end
     end
@@ -1953,7 +1953,7 @@ local
 do
     if generate then
         info := F^tds.chercherGlobalement(F^name);
-        F^code := F^generator.generateSwapArgs(ARGS^code) + F^generator.generateInstance(clazz) + F^generator.generateWriteStack(info) + F^generator.generateReadStack(info) + F^generator.generateCallConstructor(clazz, ARGS^signature);
+        F^code := F^generator.generateNew(clazz, info, ARGS^code, ARGS^signature);
     else
         F^code := "";
     end
@@ -1969,7 +1969,8 @@ local
     info : INFO;
 do
     type := F^clazz.getAttribute(ident^txt);
-    --F^code := F^generator.generateGetAttribute(ident^txt, F^clazz);
+    
+    -- L'ident est un attribut de la classe
     if type /= nil then
         info := new INFO(type, -1);
         if F^genWrite then
@@ -1979,12 +1980,14 @@ do
         end
     end
     info := F^tds.chercherGlobalement(ident^txt);
+
+    -- On a affaire à une variable locale 
     if info /= nil then
         type := info.getType();
         if F^genWrite then
             F^code := F^generator.generateWriteStack(info);
         else
-            F^code := F^generator.generateReadStack(info);
+           F^code := F^generator.generateReadStack(info);
         end
     end
     F^type := type;
@@ -2050,7 +2053,7 @@ do
             end
         end
     else
-    --    F^code := F^generator.generateReadStack(info) + Q^code;
+        F^code := F^generator.generateReadStack(info) + Q^code;
     end
 end
 }

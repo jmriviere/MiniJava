@@ -91,6 +91,8 @@ public interface IGenerator {
 	
 	String generateSwapArgs(String code);
 	
+	String generateNew(Clazz clazz, INFO info, String ArgsCode, Signature ConsSig);
+	
 	// TODO: mettre des noms de paramètres explicites
 	String generateQualification(String toto, String tata);
 }
